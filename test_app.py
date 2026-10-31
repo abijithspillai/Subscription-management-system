@@ -86,5 +86,23 @@ class BrightloopTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'recorded under reference', response.data)
 
+    def test_06_staff_cannot_create_product(self):
+        """Verify Staff cannot create products (Only Admin can add products)"""
+        # Login as staff
+        self.client.post('/login', data={
+            'email': 'sarah.staff@brightloop.com',
+            'password': 'Staff@Brightloop1'
+        }, follow_redirects=True)
+
+        # Attempt to POST new product as staff
+        response = self.client.post('/products', data={
+            'name': 'Unauthorized Product',
+            'product_type': 'SOFTWARE',
+            'sales_price': '999.00',
+            'cost_price': '100.00'
+        }, follow_redirects=True)
+        # Should not have created the product
+        self.assertNotIn(b'Product created successfully', response.data)
+
 if __name__ == '__main__':
     unittest.main()

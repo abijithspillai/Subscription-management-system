@@ -22,17 +22,18 @@
 
         <!-- Quick-Switch Test Accounts (Minimized) -->
         <div class="mt-8 bg-white/10 backdrop-blur rounded-xl p-3 border border-white/15">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-brand-200 mb-2 flex items-center">
-                <i class="fa-solid fa-bolt text-amber-400 mr-1.5 text-xs"></i> Quick Demo Logins
+            <div class="text-[11px] font-bold uppercase tracking-wider text-brand-200 mb-2 flex items-center justify-between">
+                <span><i class="fa-solid fa-bolt text-amber-400 mr-1.5 text-xs"></i> 1-Click Direct Login</span>
+                <span class="text-[9px] text-brand-200 opacity-80">Instant demo</span>
             </div>
             <div class="grid grid-cols-3 gap-1.5 text-[11px]">
-                <button type="button" onclick="fillDemo('admin@brightloop.com', 'Admin@Brightloop1')" class="py-1.5 px-2 text-center rounded-lg bg-white/10 hover:bg-white/20 transition-all font-medium">
+                <button type="button" onclick="directLogin('admin@brightloop.com', 'Admin@Brightloop1')" class="py-1.5 px-2 text-center rounded-lg bg-white/10 hover:bg-white/20 transition-all font-medium cursor-pointer" title="Direct 1-Click Login as Admin">
                     👑 Admin
                 </button>
-                <button type="button" onclick="fillDemo('sarah.staff@brightloop.com', 'Staff@Brightloop1')" class="py-1.5 px-2 text-center rounded-lg bg-white/10 hover:bg-white/20 transition-all font-medium">
+                <button type="button" onclick="directLogin('sarah.staff@brightloop.com', 'Staff@Brightloop1')" class="py-1.5 px-2 text-center rounded-lg bg-white/10 hover:bg-white/20 transition-all font-medium cursor-pointer" title="Direct 1-Click Login as Staff">
                     💼 Staff
                 </button>
-                <button type="button" onclick="fillDemo('marcus@cornerretail.com', 'Customer@Brightloop1')" class="py-1.5 px-2 text-center rounded-lg bg-white/10 hover:bg-white/20 transition-all font-medium">
+                <button type="button" onclick="directLogin('marcus@cornerretail.com', 'Customer@Brightloop1')" class="py-1.5 px-2 text-center rounded-lg bg-white/10 hover:bg-white/20 transition-all font-medium cursor-pointer" title="Direct 1-Click Login as Customer">
                     🏪 Customer
                 </button>
             </div>
@@ -144,11 +145,14 @@
         }
     }
 
-    function fillDemo(email, pass) {
+    function directLogin(email, pass) {
         showTab('login');
         document.getElementById('login_email').value = email;
         document.getElementById('login_password').value = pass;
+        // 1-Click Instant Login
+        document.getElementById('form-login').querySelector('form').submit();
     }
+    const fillDemo = directLogin;
 
     function checkPasswordRules(val) {
         const check = (id, valid) => {

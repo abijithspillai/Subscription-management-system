@@ -35,7 +35,7 @@
                     </div>
                     <div class="text-right">
                         <div class="text-xs text-slate-400 font-semibold">Base Price</div>
-                        <div class="text-xl font-black text-brand-700">${{ "{:,.2f}".format(prod.sales_price) }}</div>
+                        <div class="text-xl font-black text-brand-700">₹{{ "{:,.2f}".format(prod.sales_price) }}</div>
                     </div>
                 </div>
 
@@ -45,9 +45,9 @@
 
                 <!-- Cost & Margin Insight -->
                 <div class="mt-4 p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
-                    <span class="text-slate-500">Cost Price: <strong class="text-slate-700">${{ "{:,.2f}".format(prod.cost_price) }}</strong></span>
+                    <span class="text-slate-500">Cost Price: <strong class="text-slate-700">₹{{ "{:,.2f}".format(prod.cost_price) }}</strong></span>
                     {% set margin = prod.sales_price - prod.cost_price %}
-                    <span class="text-emerald-600 font-semibold">Margin: +${{ "{:,.2f}".format(margin) }}</span>
+                    <span class="text-emerald-600 font-semibold">Margin: +₹{{ "{:,.2f}".format(margin) }}</span>
                 </div>
 
                 <!-- Product Variants Section (Explicit requirement: Odoo Brand adds 560) -->
@@ -73,7 +73,7 @@
                                 {{ v.variant_name }}
                             </span>
                             <span class="font-bold {{ 'text-purple-700 font-black' if 'Odoo' in v.variant_name else 'text-slate-600' }}">
-                                +${{ "{:,.2f}".format(v.price_surcharge) }}
+                                +₹{{ "{:,.2f}".format(v.price_surcharge) }}
                             </span>
                         </div>
                         {% else %}
@@ -124,13 +124,13 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Sales Price ($)</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Sales Price (₹)</label>
                     <input type="number" step="0.01" name="sales_price" required placeholder="199.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cost Price ($)</label>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cost Price (₹)</label>
                 <input type="number" step="0.01" name="cost_price" value="0.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
             </div>
 
@@ -144,7 +144,7 @@
                 <span class="text-xs font-bold text-purple-900 block mb-2"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Optional Initial Variant (e.g. Brand Surcharge)</span>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="text" name="variant_name" placeholder="Variant (e.g. Odoo Brand)" class="px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-xs">
-                    <input type="number" step="0.01" name="variant_surcharge" placeholder="Surcharge ($560)" class="px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-xs">
+                    <input type="number" step="0.01" name="variant_surcharge" placeholder="Surcharge (₹560)" class="px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-xs">
                 </div>
             </div>
 
@@ -172,7 +172,7 @@
                 <input type="text" name="variant_name" required placeholder="e.g. Odoo Brand Integration" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
             </div>
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Price Surcharge ($)</label>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Price Surcharge (₹)</label>
                 <input type="number" step="0.01" name="price_surcharge" required placeholder="560.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
                 <p class="text-[11px] text-slate-400 mt-1">This amount is automatically added to the base sales price when this variant is selected.</p>
             </div>

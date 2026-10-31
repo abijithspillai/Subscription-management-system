@@ -100,7 +100,7 @@
                 <div class="grid grid-cols-3 gap-2">
                     <select name="product_id[]" class="col-span-2 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs">
                         {% for p in products %}
-                        <option value="{{ p.id }}">{{ p.name }} (${{ p.sales_price }})</option>
+                        <option value="{{ p.id }}">{{ p.name }} (₹{{ p.sales_price }})</option>
                         {% endfor %}
                     </select>
                     <input type="number" name="quantity[]" value="1" min="1" placeholder="Qty" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs">

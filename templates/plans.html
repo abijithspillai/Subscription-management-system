@@ -37,7 +37,7 @@
                 <h3 class="text-lg font-bold text-slate-900 mt-3">{{ plan.name }}</h3>
 
                 <div class="mt-4 flex items-baseline">
-                    <span class="text-3xl font-black text-slate-900">${{ "{:,.2f}".format(plan.cost) }}</span>
+                    <span class="text-3xl font-black text-slate-900">₹{{ "{:,.2f}".format(plan.cost) }}</span>
                     <span class="text-xs font-semibold text-slate-400 ml-1.5">/ {{ plan.billing_cycle.lower() }}</span>
                 </div>
 
@@ -92,7 +92,7 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cost ($)</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cost (₹)</label>
                     <input type="number" step="0.01" name="cost" required placeholder="149.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
                 </div>
                 <div>

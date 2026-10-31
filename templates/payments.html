@@ -51,7 +51,7 @@
                     <td class="px-6 py-4 text-slate-600">{{ p.payment_date }}</td>
                     <td class="px-6 py-4 text-slate-500">{{ p.recorded_by_name or 'System / Self-service' }}</td>
                     <td class="px-6 py-4 text-right font-black text-emerald-700 font-mono text-sm">
-                        +${{ "{:,.2f}".format(p.amount) }}
+                        +₹{{ "{:,.2f}".format(p.amount) }}
                     </td>
                 </tr>
                 {% else %}

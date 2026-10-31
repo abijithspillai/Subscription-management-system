@@ -100,7 +100,6 @@ def login():
             session['name'] = user['name']
             session['email'] = user['email']
             session['role'] = user['role']
-            flash(f"Welcome back, {user['name']}!", "success")
             if user['role'] == 'CUSTOMER':
                 return redirect(url_for('customer_portal'))
             return redirect(url_for('dashboard'))
@@ -152,7 +151,6 @@ def register():
         session['email'] = email
         session['role'] = 'CUSTOMER'
 
-        flash("Account created successfully! Welcome to Brightloop Software.", "success")
         return redirect(url_for('customer_portal'))
 
     return render_template('login.html', register_mode=True)
@@ -160,7 +158,6 @@ def register():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("You have been logged out.", "info")
     return redirect(url_for('login'))
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
@@ -384,7 +381,7 @@ def add_product_variant(product_id):
         )
         conn.commit()
         conn.close()
-        flash(f"Variant '{variant_name}' (Surcharge: ${surcharge:,.2f}) added.", "success")
+        flash(f"Variant '{variant_name}' (Surcharge: ₹{surcharge:,.2f}) added.", "success")
     return redirect(url_for('products'))
 
 # -------------------------------------------------------------
@@ -985,7 +982,7 @@ def record_payment(inv_id):
 
     remaining = inv['total_amount'] - inv['amount_paid']
     if amount > remaining + 0.01:
-        flash(f"Payment amount (${amount:,.2f}) exceeds outstanding balance (${remaining:,.2f}).", "danger")
+        flash(f"Payment amount (₹{amount:,.2f}) exceeds outstanding balance (₹{remaining:,.2f}).", "danger")
         conn.close()
         return redirect(url_for('invoice_detail', inv_id=inv_id))
 
@@ -1007,7 +1004,7 @@ def record_payment(inv_id):
     conn.commit()
     conn.close()
 
-    flash(f"Payment of ${amount:,.2f} recorded under reference {pay_number}. Invoice balance updated.", "success")
+    flash(f"Payment of ₹{amount:,.2f} recorded under reference {pay_number}. Invoice balance updated.", "success")
     if session.get('role') == 'CUSTOMER':
         return redirect(url_for('customer_portal'))
     return redirect(url_for('invoice_detail', inv_id=inv_id))

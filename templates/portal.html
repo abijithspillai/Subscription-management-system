@@ -55,7 +55,7 @@
                     <td class="px-6 py-4 font-semibold text-slate-600 uppercase">{{ sub.billing_cycle }}</td>
                     <td class="px-6 py-4 text-slate-600">{{ sub.start_date }}</td>
                     <td class="px-6 py-4 font-bold text-slate-800">{{ sub.next_billing_date }}</td>
-                    <td class="px-6 py-4 text-right font-black text-slate-900 font-mono text-sm">${{ "{:,.2f}".format(sub.subtotal) }}</td>
+                    <td class="px-6 py-4 text-right font-black text-slate-900 font-mono text-sm">₹{{ "{:,.2f}".format(sub.subtotal) }}</td>
                     <td class="px-6 py-4 text-center">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold
                             {% if sub.status == 'ACTIVE' %} bg-emerald-100 text-emerald-800 border border-emerald-200
@@ -111,8 +111,8 @@
                     <td class="px-6 py-4 font-semibold {{ 'text-rose-600' if (inv.status == 'CONFIRMED' and inv.due_date < today.isoformat()) else 'text-slate-700' }}">
                         {{ inv.due_date }}
                     </td>
-                    <td class="px-6 py-4 text-right font-black text-slate-900 font-mono">${{ "{:,.2f}".format(inv.total_amount) }}</td>
-                    <td class="px-6 py-4 text-right font-bold text-emerald-700 font-mono">${{ "{:,.2f}".format(inv.amount_paid) }}</td>
+                    <td class="px-6 py-4 text-right font-black text-slate-900 font-mono">₹{{ "{:,.2f}".format(inv.total_amount) }}</td>
+                    <td class="px-6 py-4 text-right font-bold text-emerald-700 font-mono">₹{{ "{:,.2f}".format(inv.amount_paid) }}</td>
                     <td class="px-6 py-4 text-center">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold
                             {% if inv.status == 'PAID' %} bg-emerald-100 text-emerald-800 border border-emerald-200
@@ -128,7 +128,7 @@
                         </a>
                         {% if balance > 0 %}
                         <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold">
-                            Pay ${{ "{:,.2f}".format(balance) }}
+                            Pay ₹{{ "{:,.2f}".format(balance) }}
                         </a>
                         {% endif %}
                     </td>
