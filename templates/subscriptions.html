@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Subscriptions & Quotes | Brightloop Technologies India{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-200">
+        <div>
+            <div class="text-[11px] font-bold text-brand-600 uppercase tracking-wider mb-0.5">
+                <i class="fa-solid fa-file-contract mr-1"></i> Step 2 in Subscription Lifecycle
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Customer Contracts & Quotes</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage recurring software agreements from quote proposal to active billing and renewal.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+            <a href="{{ url_for('new_subscription') }}" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 transition-all">
+                <i class="fa-solid fa-plus mr-1.5"></i> Create New Quote / Contract
+            </a>
+            <a href="{{ url_for('billing_dashboard') }}" class="inline-flex items-center px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all">
+                <i class="fa-solid fa-bolt mr-1.5 text-amber-400"></i> Go to Billing Day &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Explanation & "Where to Go Next" -->
+    <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-xs text-blue-900 flex items-start space-x-3">
+        <i class="fa-solid fa-circle-info text-blue-600 text-base mt-0.5"></i>
+        <div>
+            <strong>How Subscriptions Work:</strong> A contract starts as a <strong>Quotation</strong>. Once approved, mark it <strong>Active</strong>. When its billing date arrives, visit <a href="{{ url_for('billing_dashboard') }}" class="font-bold underline text-blue-900">Billing Day</a> to automatically generate the customer's monthly GST invoice.
+        </div>
+    </div>
+
+    <!-- Status Filter Pills -->
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ url_for('subscriptions') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-slate-900 text-white' if not current_filter else 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+            All Contracts
+        </a>
+        <a href="{{ url_for('subscriptions', status='ACTIVE') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-emerald-600 text-white' if current_filter == 'ACTIVE' else 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50' }}">
+            <i class="fa-solid fa-circle-check mr-1 text-[10px]"></i> Active ({{ 'Filtered' if current_filter == 'ACTIVE' else 'Live' }})
+        </a>
+        <a href="{{ url_for('subscriptions', status='QUOTATION') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-amber-600 text-white' if current_filter == 'QUOTATION' else 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-50' }}">
+            <i class="fa-solid fa-file-pen mr-1 text-[10px]"></i> Quotation Offers
+        </a>
+        <a href="{{ url_for('subscriptions', status='CONFIRMED') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-sky-600 text-white' if current_filter == 'CONFIRMED' else 'bg-white text-sky-700 border border-sky-200 hover:bg-sky-50' }}">
+            Confirmed
+        </a>
+        <a href="{{ url_for('subscriptions', status='PAUSED') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-indigo-600 text-white' if current_filter == 'PAUSED' else 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50' }}">
+            Paused
+        </a>
+        <a href="{{ url_for('subscriptions', status='CLOSED') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-slate-600 text-white' if current_filter == 'CLOSED' else 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+            Closed
+        </a>
+    </div>
+
+    <!-- Subscriptions Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
+                <tr>
+                    <th class="px-6 py-4">Contract Ref #</th>
+                    <th class="px-6 py-4">Customer Account</th>
+                    <th class="px-6 py-4">Plan & Cadence</th>
+                    <th class="px-6 py-4">Next Billing Date</th>
+                    <th class="px-6 py-4 text-right">Cycle Subtotal</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for sub in subscriptions %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-brand-700 text-xs">
+                        <a href="{{ url_for('subscription_detail', sub_id=sub.id) }}" class="hover:underline flex items-center">
+                            <i class="fa-solid fa-file-contract mr-1.5 text-slate-400"></i>
+                            {{ sub.sub_number }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-900 text-xs">{{ sub.customer_name }}</div>
+                        <div class="text-[11px] text-slate-400">{{ sub.customer_email }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-slate-800 text-xs">{{ sub.plan_name }}</div>
+                        <span class="inline-flex items-center text-[10px] font-bold text-slate-400 uppercase">
+                            <i class="fa-solid fa-repeat mr-1 text-[8px]"></i> {{ sub.billing_cycle }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-xs font-semibold text-slate-700">
+                        {{ sub.next_billing_date }}
+                    </td>
+                    <td class="px-6 py-4 text-right font-black text-slate-900 text-xs font-mono">
+                        ₹{{ "{:,.2f}".format(sub.subtotal) }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold
+                            {% if sub.status == 'ACTIVE' %} bg-emerald-100 text-emerald-800 border border-emerald-200
+                            {% elif sub.status == 'QUOTATION' %} bg-amber-100 text-amber-800 border border-amber-200
+                            {% elif sub.status == 'CONFIRMED' %} bg-sky-100 text-sky-800 border border-sky-200
+                            {% elif sub.status == 'PAUSED' %} bg-indigo-100 text-indigo-800 border border-indigo-200
+                            {% else %} bg-slate-100 text-slate-800 border border-slate-200 {% endif %}">
+                            {{ sub.status }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{{ url_for('subscription_detail', sub_id=sub.id) }}" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg text-xs font-bold transition-all">
+                            Open &rarr;
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-xs">
+                        No contracts found matching the selected filter.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

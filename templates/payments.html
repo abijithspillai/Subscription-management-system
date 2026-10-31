@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Payments Ledger | Brightloop Software{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Payments & Cash Collection Ledger</h1>
+            <p class="text-xs text-slate-500 mt-1">Multi-method reconciliation against verified customer invoices.</p>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
+                <tr>
+                    <th class="px-6 py-4">Receipt #</th>
+                    <th class="px-6 py-4">Invoice #</th>
+                    <th class="px-6 py-4">Customer</th>
+                    <th class="px-6 py-4">Payment Method</th>
+                    <th class="px-6 py-4">Date</th>
+                    <th class="px-6 py-4">Recorded By</th>
+                    <th class="px-6 py-4 text-right">Amount Paid</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for p in payments %}
+                <tr class="hover:bg-slate-50 transition-colors text-xs">
+                    <td class="px-6 py-4 font-mono font-bold text-slate-900">
+                        {{ p.payment_number }}
+                    </td>
+                    <td class="px-6 py-4 font-mono font-bold text-brand-700">
+                        <a href="{{ url_for('invoice_detail', inv_id=p.invoice_id) }}" class="hover:underline">
+                            {{ p.invoice_number }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-900">{{ p.customer_name }}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800">
+                            <i class="fa-solid fa-money-bill-transfer mr-1.5 text-brand-600"></i>
+                            {{ p.payment_method }}
+                        </span>
+                        {% if p.note %}
+                        <span class="block text-[10px] text-slate-400 mt-0.5 truncate max-w-xs">{{ p.note }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-slate-600">{{ p.payment_date }}</td>
+                    <td class="px-6 py-4 text-slate-500">{{ p.recorded_by_name or 'System / Self-service' }}</td>
+                    <td class="px-6 py-4 text-right font-black text-emerald-700 font-mono text-sm">
+                        +${{ "{:,.2f}".format(p.amount) }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-xs">
+                        No payments recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

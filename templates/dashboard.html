@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Brightloop Technologies India{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-slate-200">
+        <div>
+            <div class="flex items-center space-x-2">
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Business Overview & Revenue</h1>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> Live SQLite
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Real-time metrics for Brightloop India software subscriptions, billing cycles, and UPI/Bank collections.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+            <a href="{{ url_for('new_subscription') }}" class="inline-flex items-center px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 transition-all">
+                <i class="fa-solid fa-plus mr-1.5"></i> Create New Quote / Contract
+            </a>
+            <a href="{{ url_for('billing_dashboard') }}" class="inline-flex items-center px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition-all">
+                <i class="fa-solid fa-bolt mr-1.5"></i> Run Billing Day
+            </a>
+        </div>
+    </div>
+
+    <!-- "WHERE TO GO NEXT" GUIDED ROADMAP (Direct answer to user's feedback) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-compass text-brand-600 text-base"></i>
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">What would you like to do next? (Quick Guide)</h2>
+            </div>
+            <span class="text-xs text-slate-400">Step-by-step subscription lifecycle</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Step 1 -->
+            <a href="{{ url_for('products') }}" class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-300 transition-all group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Step 1</span>
+                        <i class="fa-solid fa-cube text-slate-400 group-hover:text-brand-600 text-xs"></i>
+                    </div>
+                    <div class="font-bold text-slate-900 text-xs group-hover:text-brand-700">Setup Products & Plans</div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Add software licenses, Odoo variant addons, and billing cadences.</p>
+                </div>
+                <div class="mt-2 text-[11px] font-bold text-brand-600 flex items-center">
+                    Manage Catalog &rarr;
+                </div>
+            </a>
+
+            <!-- Step 2 -->
+            <a href="{{ url_for('new_subscription') }}" class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 transition-all group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Step 2</span>
+                        <i class="fa-solid fa-file-signature text-slate-400 group-hover:text-indigo-600 text-xs"></i>
+                    </div>
+                    <div class="font-bold text-slate-900 text-xs group-hover:text-indigo-700">Send Customer Quote</div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Select customer, pick products and variants, and create an active contract.</p>
+                </div>
+                <div class="mt-2 text-[11px] font-bold text-indigo-600 flex items-center">
+                    New Subscription &rarr;
+                </div>
+            </a>
+
+            <!-- Step 3 -->
+            <a href="{{ url_for('billing_dashboard') }}" class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition-all group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Step 3</span>
+                        <i class="fa-solid fa-bolt text-amber-500 text-xs"></i>
+                    </div>
+                    <div class="font-bold text-slate-900 text-xs group-hover:text-amber-700">Run Monthly Billing</div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Auto-generate invoices for all contracts due this month with GST calculated.</p>
+                </div>
+                <div class="mt-2 text-[11px] font-bold text-amber-600 flex items-center">
+                    Generate Invoices &rarr;
+                </div>
+            </a>
+
+            <!-- Step 4 -->
+            <a href="{{ url_for('invoices') }}" class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 transition-all group flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Step 4</span>
+                        <i class="fa-solid fa-qrcode text-emerald-500 text-xs"></i>
+                    </div>
+                    <div class="font-bold text-slate-900 text-xs group-hover:text-emerald-700">Collect UPI & Payments</div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">View unpaid bills, send PDF invoices, and record UPI or bank transfers.</p>
+                </div>
+                <div class="mt-2 text-[11px] font-bold text-emerald-600 flex items-center">
+                    View Invoices &rarr;
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Banner if Subscriptions Are Due for Billing -->
+    {% if due_for_billing > 0 %}
+    <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div>
+                <div class="text-sm font-bold text-slate-900">{{ due_for_billing }} Subscription(s) are due for billing today!</div>
+                <div class="text-xs text-slate-600">Click below to generate their monthly GST invoices in one click without typing by hand.</div>
+            </div>
+        </div>
+        <a href="{{ url_for('billing_dashboard') }}" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+            Generate Bills Now &rarr;
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- 4 Primary Business KPIs (Clear Indian Business Terminology) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Active Contracts -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-brand-300 transition-all">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Active Contracts</span>
+                <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm"><i class="fa-solid fa-circle-nodes"></i></span>
+            </div>
+            <div class="text-3xl font-black text-slate-900 mt-2">{{ active_subs }}</div>
+            <div class="text-xs text-slate-500 mt-1 flex items-center justify-between">
+                <span>Customers on active plans</span>
+                <a href="{{ url_for('subscriptions', status='ACTIVE') }}" class="text-brand-600 font-bold hover:underline">View &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Monthly Recurring Revenue (MRR) -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition-all">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Monthly Revenue (MRR)</span>
+                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm"><i class="fa-solid fa-indian-rupee-sign"></i></span>
+            </div>
+            <div class="text-3xl font-black text-slate-900 mt-2">₹{{ "{:,.2f}".format(mrr) }}</div>
+            <div class="text-xs text-slate-500 mt-1">
+                Annual Run-Rate: <span class="font-bold text-slate-800">₹{{ "{:,.2f}".format(arr) }}</span>
+            </div>
+        </div>
+
+        <!-- Total Revenue Collected -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-emerald-300 transition-all">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Collected Revenue</span>
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="text-3xl font-black text-emerald-700 mt-2">₹{{ "{:,.2f}".format(total_collected) }}</div>
+            <div class="text-xs text-slate-500 mt-1 flex items-center justify-between">
+                <span>Received via UPI / Bank</span>
+                <a href="{{ url_for('payments_list') }}" class="text-emerald-700 font-bold hover:underline">History &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Overdue Receivables -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-rose-300 transition-all">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Unpaid / Overdue</span>
+                <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            </div>
+            <div class="text-3xl font-black text-rose-600 mt-2">₹{{ "{:,.2f}".format(overdue_amount) }}</div>
+            <div class="text-xs text-slate-500 mt-1 flex items-center justify-between">
+                <span>{{ overdue_count }} bill(s) pending payment</span>
+                <a href="{{ url_for('invoices', status='OVERDUE') }}" class="text-rose-600 font-bold hover:underline">Chase Bills &rarr;</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Two Column Section: Recent Subscriptions & Recent Invoices with Clear Next Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Left: Recent Subscriptions -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Customer Contracts</h3>
+                    <p class="text-xs text-slate-500">Click any contract to update its status or inspect terms</p>
+                </div>
+                <a href="{{ url_for('subscriptions') }}" class="text-xs font-bold text-brand-600 hover:text-brand-700">View All &rarr;</a>
+            </div>
+            <div class="divide-y divide-slate-100 flex-1">
+                {% for sub in recent_subs %}
+                <div class="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ url_for('subscription_detail', sub_id=sub.id) }}" class="font-bold text-xs text-brand-700 hover:underline">{{ sub.sub_number }}</a>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
+                                {% if sub.status == 'ACTIVE' %} bg-emerald-100 text-emerald-800
+                                {% elif sub.status == 'QUOTATION' %} bg-amber-100 text-amber-800
+                                {% elif sub.status == 'PAUSED' %} bg-slate-100 text-slate-800
+                                {% else %} bg-sky-100 text-sky-800 {% endif %}">
+                                {{ sub.status }}
+                            </span>
+                        </div>
+                        <div class="text-xs text-slate-700 font-semibold mt-0.5">{{ sub.customer_name }}</div>
+                        <div class="text-[11px] text-slate-400">Plan: {{ sub.plan_name }} ({{ sub.billing_cycle }})</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[11px] text-slate-400">Next Renewal:</div>
+                        <div class="text-xs font-bold text-slate-800">{{ sub.next_billing_date }}</div>
+                        <a href="{{ url_for('subscription_detail', sub_id=sub.id) }}" class="inline-block mt-1 text-[11px] font-bold text-brand-600 hover:underline">
+                            Open Contract &rarr;
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-8 text-center text-slate-400 text-xs">No customer contracts created yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: Recent Invoices & Bills -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Recent GST Invoices</h3>
+                    <p class="text-xs text-slate-500">Bills generated and pending payments</p>
+                </div>
+                <a href="{{ url_for('invoices') }}" class="text-xs font-bold text-brand-600 hover:text-brand-700">View All &rarr;</a>
+            </div>
+            <div class="divide-y divide-slate-100 flex-1">
+                {% for inv in recent_invoices %}
+                {% set is_overdue = (inv.status == 'CONFIRMED' and inv.due_date < today.isoformat()) %}
+                <div class="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="font-bold text-xs text-brand-700 hover:underline">{{ inv.invoice_number }}</a>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
+                                {% if inv.status == 'PAID' %} bg-emerald-100 text-emerald-800
+                                {% elif is_overdue %} bg-rose-100 text-rose-800
+                                {% elif inv.status == 'CONFIRMED' %} bg-sky-100 text-sky-800
+                                {% else %} bg-slate-100 text-slate-800 {% endif %}">
+                                {% if is_overdue %}OVERDUE{% else %}{{ inv.status }}{% endif %}
+                            </span>
+                        </div>
+                        <div class="text-xs text-slate-700 font-semibold mt-0.5">{{ inv.customer_name }}</div>
+                        <div class="text-[11px] text-slate-400">Due: {{ inv.due_date }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-black text-slate-900">₹{{ "{:,.2f}".format(inv.total_amount) }}</div>
+                        {% if inv.status != 'PAID' %}
+                        <div class="text-[11px] text-rose-600 font-bold">Unpaid: ₹{{ "{:,.2f}".format(inv.total_amount - inv.amount_paid) }}</div>
+                        <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="inline-block mt-1 text-[11px] font-bold text-emerald-700 hover:underline">
+                            Collect via UPI &rarr;
+                        </a>
+                        {% else %}
+                        <div class="text-[11px] text-emerald-600 font-semibold"><i class="fa-solid fa-check"></i> Paid</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-8 text-center text-slate-400 text-xs">No invoices generated yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

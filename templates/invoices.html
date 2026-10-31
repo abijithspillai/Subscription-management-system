@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}GST Invoices & Receivables | Brightloop Technologies India{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-200">
+        <div>
+            <div class="text-[11px] font-bold text-teal-600 uppercase tracking-wider mb-0.5">
+                <i class="fa-solid fa-file-invoice mr-1"></i> Step 4 in Subscription Lifecycle
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">GST Invoices & Cash Receivables</h1>
+            <p class="text-xs text-slate-500 mt-1">Review customer bills, download printable GST tax invoices, and record UPI or Bank payments.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+            <a href="{{ url_for('billing_dashboard') }}" class="inline-flex items-center px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition-all">
+                <i class="fa-solid fa-bolt mr-1.5"></i> Run Billing Day
+            </a>
+            <a href="{{ url_for('payments_list') }}" class="inline-flex items-center px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all">
+                <i class="fa-solid fa-wallet mr-1.5 text-emerald-400"></i> View Payment History &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Help & Where to Go Next -->
+    <div class="bg-teal-50 border border-teal-200 p-4 rounded-xl text-xs text-teal-900 flex items-start space-x-3">
+        <i class="fa-solid fa-hand-holding-dollar text-teal-600 text-base mt-0.5"></i>
+        <div>
+            <strong>How Billing & Payment Works:</strong> When you generate bills on <strong>Billing Day</strong>, they appear here. Click <strong>"Collect Payment / View"</strong> on any bill to print an official GST Tax Invoice or record received funds via <strong>UPI (GPay/PhonePe)</strong> or <strong>Bank Transfer (NEFT/RTGS)</strong>.
+        </div>
+    </div>
+
+    <!-- Status Filters -->
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ url_for('invoices') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-slate-900 text-white' if not current_filter else 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+            All Bills
+        </a>
+        <a href="{{ url_for('invoices', status='OVERDUE') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-rose-600 text-white' if current_filter == 'OVERDUE' else 'bg-white text-rose-700 border border-rose-200 hover:bg-rose-50' }}">
+            <i class="fa-solid fa-triangle-exclamation mr-1 text-[10px]"></i> Unpaid / Overdue
+        </a>
+        <a href="{{ url_for('invoices', status='CONFIRMED') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-sky-600 text-white' if current_filter == 'CONFIRMED' else 'bg-white text-sky-700 border border-sky-200 hover:bg-sky-50' }}">
+            Confirmed / Due
+        </a>
+        <a href="{{ url_for('invoices', status='PAID') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-emerald-600 text-white' if current_filter == 'PAID' else 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50' }}">
+            <i class="fa-solid fa-check mr-1 text-[10px]"></i> Paid in Full
+        </a>
+        <a href="{{ url_for('invoices', status='DRAFT') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {{ 'bg-slate-600 text-white' if current_filter == 'DRAFT' else 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+            Draft
+        </a>
+    </div>
+
+    <!-- Invoices Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
+                <tr>
+                    <th class="px-6 py-4">Invoice #</th>
+                    <th class="px-6 py-4">Customer Business</th>
+                    <th class="px-6 py-4">Contract Ref</th>
+                    <th class="px-6 py-4">Invoice Date</th>
+                    <th class="px-6 py-4">Payment Due</th>
+                    <th class="px-6 py-4 text-right">Total (with GST)</th>
+                    <th class="px-6 py-4 text-right">Balance Due</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for inv in invoices %}
+                {% set is_overdue = (inv.status == 'CONFIRMED' and inv.due_date < today.isoformat()) %}
+                <tr class="hover:bg-slate-50 transition-colors text-xs">
+                    <td class="px-6 py-4 font-mono font-bold text-brand-700">
+                        <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="hover:underline">
+                            {{ inv.invoice_number }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-900">{{ inv.customer_name }}</td>
+                    <td class="px-6 py-4 text-slate-500 font-mono">{{ inv.sub_number or 'Direct' }}</td>
+                    <td class="px-6 py-4 text-slate-600">{{ inv.invoice_date }}</td>
+                    <td class="px-6 py-4 font-semibold {{ 'text-rose-600 font-bold' if is_overdue else 'text-slate-700' }}">
+                        {{ inv.due_date }}
+                        {% if is_overdue %}
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500 ml-1"></i>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right font-black text-slate-900 font-mono text-xs">₹{{ "{:,.2f}".format(inv.total_amount) }}</td>
+                    <td class="px-6 py-4 text-right font-bold font-mono text-xs {{ 'text-rose-600' if (inv.total_amount - inv.amount_paid) > 0 else 'text-emerald-600' }}">
+                        ₹{{ "{:,.2f}".format(inv.total_amount - inv.amount_paid) }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold
+                            {% if inv.status == 'PAID' %} bg-emerald-100 text-emerald-800 border border-emerald-200
+                            {% elif is_overdue %} bg-rose-100 text-rose-800 border border-rose-200
+                            {% elif inv.status == 'CONFIRMED' %} bg-sky-100 text-sky-800 border border-sky-200
+                            {% else %} bg-slate-100 text-slate-800 border border-slate-200 {% endif %}">
+                            {% if is_overdue %}OVERDUE{% else %}{{ inv.status }}{% endif %}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg font-bold text-xs">
+                            View / Pay &rarr;
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="px-6 py-12 text-center text-slate-400 text-xs">
+                        No invoices found for this criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

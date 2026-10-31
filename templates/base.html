@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Brightloop Software | Unified Subscription Platform{% endblock %}</title>
+    <title>{% block title %}Brightloop India | Subscription & Billing Platform{% endblock %}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -41,110 +41,168 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
 
-    <!-- Top Navigation Bar (Hidden on print) -->
+    <!-- Top Navigation Bar -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <!-- Left: Brand Logo & Main Nav -->
-                <div class="flex items-center space-x-8">
+                
+                <!-- Left: Logo & Clear Menu -->
+                <div class="flex items-center space-x-6">
                     <a href="{{ url_for('index') }}" class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
-                            <i class="fa-solid fa-arrows-spin text-xl animate-pulse"></i>
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                            <i class="fa-solid fa-arrows-spin text-xl"></i>
                         </div>
                         <div>
-                            <span class="text-xl font-black tracking-tight text-slate-900">Brightloop</span>
-                            <span class="text-xs block font-semibold text-brand-600 tracking-wider uppercase">Subscriptions</span>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-xl font-black tracking-tight text-slate-900">Brightloop</span>
+                                <span class="text-[11px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-200">🇮🇳 India</span>
+                            </div>
+                            <span class="text-[11px] block font-semibold text-slate-500">Subscription & Billing ERP</span>
                         </div>
                     </a>
 
                     {% if current_user.id and current_user.role in ['ADMIN', 'STAFF'] %}
-                    <nav class="hidden md:flex space-x-1 lg:space-x-3">
-                        <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if request.endpoint == 'dashboard' else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-chart-pie mr-1.5 text-xs"></i>Cockpit
+                    <nav class="hidden lg:flex items-center space-x-1">
+                        <!-- 1. Dashboard -->
+                        <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if request.endpoint == 'dashboard' else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-chart-line mr-1 text-xs"></i> Dashboard
                         </a>
-                        <a href="{{ url_for('subscriptions') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'subscription' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-file-contract mr-1.5 text-xs"></i>Subscriptions
+
+                        <!-- 2. Subscriptions & Quotes -->
+                        <a href="{{ url_for('subscriptions') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'subscription' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-file-contract mr-1 text-xs"></i> Subscriptions & Quotes
                         </a>
-                        <a href="{{ url_for('billing_dashboard') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'billing' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-bolt mr-1.5 text-xs text-amber-500"></i>Billing Day
+
+                        <!-- 3. Billing Day -->
+                        <a href="{{ url_for('billing_dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'billing' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-bolt mr-1 text-xs text-amber-500"></i> Run Billing Day
                         </a>
-                        <a href="{{ url_for('invoices') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'invoice' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-file-invoice-dollar mr-1.5 text-xs"></i>Invoices
+
+                        <!-- 4. Invoices -->
+                        <a href="{{ url_for('invoices') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'invoice' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-file-invoice mr-1 text-xs text-teal-600"></i> GST Invoices
                         </a>
-                        <a href="{{ url_for('payments_list') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'payment' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-wallet mr-1.5 text-xs"></i>Payments
+
+                        <!-- 5. Payments -->
+                        <a href="{{ url_for('payments_list') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'payment' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-wallet mr-1 text-xs text-emerald-600"></i> Payments (UPI/Bank)
                         </a>
-                        <div class="relative group flex items-center">
-                            <button class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center">
-                                <i class="fa-solid fa-sliders mr-1.5 text-xs"></i>Catalog & Rules <i class="fa-solid fa-chevron-down ml-1.5 text-[10px]"></i>
+
+                        <!-- 6. Catalog Dropdown -->
+                        <div class="relative group">
+                            <button class="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center">
+                                <i class="fa-solid fa-box-open mr-1 text-xs text-indigo-600"></i> Products & Plans <i class="fa-solid fa-chevron-down ml-1 text-[9px]"></i>
                             </button>
-                            <div class="absolute left-0 top-full hidden group-hover:block w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-2 mt-0 z-50">
-                                <a href="{{ url_for('products') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-box mr-2 text-brand-500"></i>Products & Variants</a>
-                                <a href="{{ url_for('plans') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-repeat mr-2 text-brand-500"></i>Billing Plans</a>
-                                <a href="{{ url_for('quotation_templates') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-receipt mr-2 text-brand-500"></i>Quote Templates</a>
+                            <div class="absolute left-0 top-full hidden group-hover:block w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-2 mt-0 z-50">
+                                <a href="{{ url_for('products') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                    <i class="fa-solid fa-cube mr-2 text-brand-500"></i> Products & Variants
+                                </a>
+                                <a href="{{ url_for('plans') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                    <i class="fa-solid fa-repeat mr-2 text-indigo-500"></i> Monthly/Yearly Plans
+                                </a>
+                                <a href="{{ url_for('quotation_templates') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                    <i class="fa-solid fa-receipt mr-2 text-amber-500"></i> Quotation Templates
+                                </a>
                                 {% if current_user.role == 'ADMIN' %}
                                 <div class="border-t border-slate-100 my-1"></div>
-                                <a href="{{ url_for('discounts') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-tags mr-2 text-purple-600"></i>Discounts (Admin)</a>
-                                <a href="{{ url_for('taxes') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-percent mr-2 text-teal-600"></i>Tax Rules (Admin)</a>
-                                <a href="{{ url_for('manage_staff') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-user-shield mr-2 text-rose-600"></i>Staff Access (Admin)</a>
+                                <div class="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Admin Only</div>
+                                <a href="{{ url_for('discounts') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                    <i class="fa-solid fa-tags mr-2 text-purple-600"></i> Discount Rules
+                                </a>
+                                <a href="{{ url_for('taxes') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                    <i class="fa-solid fa-percent mr-2 text-teal-600"></i> GST Tax Rules
+                                </a>
+                                <a href="{{ url_for('manage_staff') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                    <i class="fa-solid fa-users-gear mr-2 text-rose-600"></i> Staff Accounts
+                                </a>
                                 {% endif %}
                             </div>
                         </div>
                     </nav>
                     {% elif current_user.id and current_user.role == 'CUSTOMER' %}
                     <nav class="hidden md:flex space-x-3">
-                        <a href="{{ url_for('customer_portal') }}" class="px-3 py-2 rounded-lg text-sm font-medium bg-brand-50 text-brand-700">
-                            <i class="fa-solid fa-user-circle mr-1.5"></i>My Subscriptions & Invoices
+                        <a href="{{ url_for('customer_portal') }}" class="px-3 py-2 rounded-lg text-xs font-bold bg-brand-50 text-brand-700">
+                            <i class="fa-solid fa-user-circle mr-1.5"></i> My Account & Subscriptions
                         </a>
                     </nav>
                     {% endif %}
                 </div>
 
-                <!-- Right: User Identity & Actions -->
+                <!-- Right: Quick Action & User Menu -->
                 <div class="flex items-center space-x-3">
                     {% if current_user.id %}
-                        <!-- Role Badge -->
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
+                        {% if current_user.role in ['ADMIN', 'STAFF'] %}
+                        <a href="{{ url_for('new_subscription') }}" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all">
+                            <i class="fa-solid fa-plus mr-1"></i> New Quote
+                        </a>
+                        {% endif %}
+
+                        <!-- User Role Badge -->
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold
                             {% if current_user.role == 'ADMIN' %} bg-purple-100 text-purple-800 border border-purple-200
                             {% elif current_user.role == 'STAFF' %} bg-sky-100 text-sky-800 border border-sky-200
                             {% else %} bg-emerald-100 text-emerald-800 border border-emerald-200 {% endif %}">
-                            <i class="fa-solid {{ 'fa-crown' if current_user.role == 'ADMIN' else 'fa-id-badge' if current_user.role == 'STAFF' else 'fa-user' }} mr-1"></i>
                             {{ current_user.role }}
                         </span>
 
-                        <div class="text-right hidden sm:block">
-                            <div class="text-sm font-semibold text-slate-900 leading-none">{{ current_user.name }}</div>
-                            <div class="text-xs text-slate-400 mt-0.5">{{ current_user.email }}</div>
+                        <div class="text-right hidden md:block">
+                            <div class="text-xs font-bold text-slate-900 leading-none">{{ current_user.name }}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">{{ current_user.email }}</div>
                         </div>
 
                         <a href="{{ url_for('logout') }}" title="Logout" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors">
-                            <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i>
+                            <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
                         </a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700">Sign in</a>
-                        <a href="{{ url_for('register') }}" class="ml-4 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700">
+                        <a href="{{ url_for('login') }}" class="text-xs font-bold text-brand-600 hover:text-brand-700">Sign in</a>
+                        <a href="{{ url_for('register') }}" class="ml-3 inline-flex items-center justify-center px-3.5 py-1.5 border border-transparent rounded-lg shadow-sm text-xs font-bold text-white bg-brand-600 hover:bg-brand-700">
                             Create Account
                         </a>
                     {% endif %}
                 </div>
             </div>
         </div>
+
+        <!-- Quick Workflow Bar (Where to go next roadmap) for logged-in Staff/Admin -->
+        {% if current_user.id and current_user.role in ['ADMIN', 'STAFF'] %}
+        <div class="bg-slate-100/90 border-t border-slate-200 py-1.5 px-4 text-xs">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 text-slate-600">
+                    <span class="font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-map-location-dot text-brand-600 mr-1.5"></i> Workflow Guide:
+                    </span>
+                    <a href="{{ url_for('products') }}" class="hover:text-brand-700 font-semibold text-slate-700">1. Catalog & Plans</a>
+                    <span class="text-slate-300">&rarr;</span>
+                    <a href="{{ url_for('new_subscription') }}" class="hover:text-brand-700 font-semibold text-slate-700">2. Create Quote</a>
+                    <span class="text-slate-300">&rarr;</span>
+                    <a href="{{ url_for('billing_dashboard') }}" class="hover:text-amber-700 font-semibold text-amber-800">3. Billing Day</a>
+                    <span class="text-slate-300">&rarr;</span>
+                    <a href="{{ url_for('invoices') }}" class="hover:text-teal-700 font-semibold text-teal-800">4. GST Invoices</a>
+                    <span class="text-slate-300">&rarr;</span>
+                    <a href="{{ url_for('payments_list') }}" class="hover:text-emerald-700 font-semibold text-emerald-800">5. Collect Payments</a>
+                </div>
+                <div class="text-[11px] text-slate-500 hidden sm:block">
+                    Kochi, Kerala &bull; GST Registered &bull; UPI Enabled
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </header>
 
-    <!-- Flash Messages Container -->
+    <!-- Flash Messages -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full no-print">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-3 rounded-xl p-4 border flex items-start space-x-3 shadow-sm
+                    <div class="mb-3 rounded-xl p-3.5 border flex items-start space-x-3 shadow-sm
                         {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800
                         {% elif category == 'danger' %} bg-rose-50 border-rose-200 text-rose-800
                         {% elif category == 'warning' %} bg-amber-50 border-amber-200 text-amber-800
                         {% else %} bg-sky-50 border-sky-200 text-sky-800 {% endif %}">
-                        <i class="fa-solid {{ 'fa-circle-check text-emerald-500' if category == 'success' else 'fa-circle-exclamation text-rose-500' if category == 'danger' else 'fa-triangle-exclamation text-amber-500' if category == 'warning' else 'fa-circle-info text-sky-500' }} mt-0.5 text-lg"></i>
-                        <div class="flex-1 text-sm font-medium">{{ message }}</div>
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-500' if category == 'success' else 'fa-circle-exclamation text-rose-500' if category == 'danger' else 'fa-triangle-exclamation text-amber-500' if category == 'warning' else 'fa-circle-info text-sky-500' }} mt-0.5 text-base"></i>
+                        <div class="flex-1 text-xs font-semibold">{{ message }}</div>
                         <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600">
-                            <i class="fa-solid fa-xmark"></i>
+                            <i class="fa-solid fa-xmark text-sm"></i>
                         </button>
                     </div>
                 {% endfor %}
@@ -158,17 +216,16 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500 no-print">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+    <footer class="bg-white border-t border-slate-200 mt-auto py-5 text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
             <div>
-                <strong>Brightloop Software</strong> &copy; 2026. Built for Odoo Cross Makeathon 9.0 (CUSAT).
+                <strong class="text-slate-800">Brightloop Technologies India Pvt. Ltd.</strong> &copy; 2026.
+                <span class="block text-[11px] text-slate-400 mt-0.5">Infopark Phase II, Kakkanad, Kochi, Kerala &bull; GSTIN: 32AAACB1234D1Z5</span>
             </div>
-            <div class="flex items-center space-x-4">
-                <span class="inline-flex items-center text-emerald-600 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span> Live SQLite Engine
-                </span>
-                <span>Idempotent Billing</span>
-                <span>Role-Based Security</span>
+            <div class="flex items-center space-x-4 text-xs font-semibold">
+                <span class="text-slate-600"><i class="fa-solid fa-indian-rupee-sign text-emerald-600 mr-1"></i> INR Billing</span>
+                <span class="text-slate-600"><i class="fa-solid fa-qrcode text-indigo-600 mr-1"></i> UPI & NetBanking</span>
+                <span class="text-slate-600"><i class="fa-solid fa-receipt text-teal-600 mr-1"></i> GST Compliant</span>
             </div>
         </div>
     </footer>
