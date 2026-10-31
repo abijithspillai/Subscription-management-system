@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Products & Variants | Brightloop Software{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Product Catalog & Variants</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage recurring software, addons, services, and brand/tier variant surcharges.</p>
+        </div>
+        {% if current_user.role == 'ADMIN' %}
+        <button onclick="document.getElementById('modal-new-product').classList.remove('hidden')" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 transition-all">
+            <i class="fa-solid fa-plus mr-1.5"></i> Add New Product
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Product Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for prod in products %}
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-all">
+            <div>
+                <div class="flex items-start justify-between">
+                    <div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold
+                            {% if prod.product_type == 'SOFTWARE' %} bg-indigo-100 text-indigo-800
+                            {% elif prod.product_type == 'ADDON' %} bg-purple-100 text-purple-800
+                            {% else %} bg-sky-100 text-sky-800 {% endif %}">
+                            {{ prod.product_type }}
+                        </span>
+                        <h3 class="text-lg font-bold text-slate-900 mt-2">{{ prod.name }}</h3>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 font-semibold">Base Price</div>
+                        <div class="text-xl font-black text-brand-700">${{ "{:,.2f}".format(prod.sales_price) }}</div>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    {{ prod.notes or 'No description provided.' }}
+                </p>
+
+                <!-- Cost & Margin Insight -->
+                <div class="mt-4 p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Cost Price: <strong class="text-slate-700">${{ "{:,.2f}".format(prod.cost_price) }}</strong></span>
+                    {% set margin = prod.sales_price - prod.cost_price %}
+                    <span class="text-emerald-600 font-semibold">Margin: +${{ "{:,.2f}".format(margin) }}</span>
+                </div>
+
+                <!-- Product Variants Section (Explicit requirement: Odoo Brand adds 560) -->
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Configured Variants</span>
+                        {% if current_user.role == 'ADMIN' %}
+                        <button onclick="openVariantModal('{{ prod.id }}', '{{ prod.name }}')" class="text-[11px] font-bold text-brand-600 hover:text-brand-800">
+                            + Add Variant
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1.5">
+                        {% set vars = variants_map.get(prod.id, []) %}
+                        {% for v in vars %}
+                        <div class="flex items-center justify-between px-2.5 py-1.5 bg-slate-50 rounded-lg text-xs border border-slate-200">
+                            <span class="font-medium text-slate-800 flex items-center">
+                                {% if 'Odoo' in v.variant_name %}
+                                <i class="fa-solid fa-crown text-purple-600 mr-1.5 text-[10px]"></i>
+                                {% else %}
+                                <i class="fa-solid fa-tag text-slate-400 mr-1.5 text-[10px]"></i>
+                                {% endif %}
+                                {{ v.variant_name }}
+                            </span>
+                            <span class="font-bold {{ 'text-purple-700 font-black' if 'Odoo' in v.variant_name else 'text-slate-600' }}">
+                                +${{ "{:,.2f}".format(v.price_surcharge) }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="text-[11px] text-slate-400 italic">No variants configured. Standard pricing applies.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <span>Status: <strong class="text-emerald-600">Active</strong></span>
+                <span>ID: #PRD-{{ prod.id }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full bg-white p-12 text-center rounded-2xl border border-slate-200 text-slate-500">
+            No products found. Click "Add New Product" to create your first item.
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Modal: New Product (Admin Only) -->
+{% if current_user.role == 'ADMIN' %}
+<div id="modal-new-product" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-900">Add New Catalog Product</h3>
+            <button onclick="document.getElementById('modal-new-product').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('products') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Product Name</label>
+                <input type="text" name="name" required placeholder="e.g. Brightloop Analytics Suite" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Type</label>
+                    <select name="product_type" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+                        <option value="SOFTWARE">Software License</option>
+                        <option value="ADDON">Add-on Module</option>
+                        <option value="SERVICE">Managed Service</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Sales Price ($)</label>
+                    <input type="number" step="0.01" name="sales_price" required placeholder="199.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cost Price ($)</label>
+                <input type="number" step="0.01" name="cost_price" value="0.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Description / Notes</label>
+                <textarea name="notes" rows="2" placeholder="Feature details and specifications..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm"></textarea>
+            </div>
+
+            <!-- Optional Initial Variant -->
+            <div class="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                <span class="text-xs font-bold text-purple-900 block mb-2"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Optional Initial Variant (e.g. Brand Surcharge)</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" name="variant_name" placeholder="Variant (e.g. Odoo Brand)" class="px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-xs">
+                    <input type="number" step="0.01" name="variant_surcharge" placeholder="Surcharge ($560)" class="px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-xs">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-3">
+                <button type="button" onclick="document.getElementById('modal-new-product').classList.add('hidden')" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Variant -->
+<div id="modal-add-variant" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-900">Add Variant for <span id="var-prod-name" class="text-brand-600"></span></h3>
+            <button onclick="document.getElementById('modal-add-variant').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form id="form-add-variant" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Variant Name</label>
+                <input type="text" name="variant_name" required placeholder="e.g. Odoo Brand Integration" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Price Surcharge ($)</label>
+                <input type="number" step="0.01" name="price_surcharge" required placeholder="560.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+                <p class="text-[11px] text-slate-400 mt-1">This amount is automatically added to the base sales price when this variant is selected.</p>
+            </div>
+            <div class="flex justify-end space-x-3 pt-3">
+                <button type="button" onclick="document.getElementById('modal-add-variant').classList.add('hidden')" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-500/20">Add Variant</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openVariantModal(prodId, prodName) {
+        document.getElementById('var-prod-name').innerText = prodName;
+        document.getElementById('form-add-variant').action = `/products/${prodId}/add-variant`;
+        document.getElementById('modal-add-variant').classList.remove('hidden');
+    }
+</script>
+{% endblock %}
