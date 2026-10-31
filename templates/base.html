@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Brightloop Software | Unified Subscription Platform{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#082f49',
+                        },
+                        odoo: {
+                            500: '#714B67',
+                            600: '#5B3953',
+                            700: '#462740'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- Top Navigation Bar (Hidden on print) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Left: Brand Logo & Main Nav -->
+                <div class="flex items-center space-x-8">
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                            <i class="fa-solid fa-arrows-spin text-xl animate-pulse"></i>
+                        </div>
+                        <div>
+                            <span class="text-xl font-black tracking-tight text-slate-900">Brightloop</span>
+                            <span class="text-xs block font-semibold text-brand-600 tracking-wider uppercase">Subscriptions</span>
+                        </div>
+                    </a>
+
+                    {% if current_user.id and current_user.role in ['ADMIN', 'STAFF'] %}
+                    <nav class="hidden md:flex space-x-1 lg:space-x-3">
+                        <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if request.endpoint == 'dashboard' else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-chart-pie mr-1.5 text-xs"></i>Cockpit
+                        </a>
+                        <a href="{{ url_for('subscriptions') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'subscription' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-file-contract mr-1.5 text-xs"></i>Subscriptions
+                        </a>
+                        <a href="{{ url_for('billing_dashboard') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'billing' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-bolt mr-1.5 text-xs text-amber-500"></i>Billing Day
+                        </a>
+                        <a href="{{ url_for('invoices') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'invoice' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-file-invoice-dollar mr-1.5 text-xs"></i>Invoices
+                        </a>
+                        <a href="{{ url_for('payments_list') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ 'bg-brand-50 text-brand-700' if 'payment' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                            <i class="fa-solid fa-wallet mr-1.5 text-xs"></i>Payments
+                        </a>
+                        <div class="relative group flex items-center">
+                            <button class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center">
+                                <i class="fa-solid fa-sliders mr-1.5 text-xs"></i>Catalog & Rules <i class="fa-solid fa-chevron-down ml-1.5 text-[10px]"></i>
+                            </button>
+                            <div class="absolute left-0 top-full hidden group-hover:block w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-2 mt-0 z-50">
+                                <a href="{{ url_for('products') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-box mr-2 text-brand-500"></i>Products & Variants</a>
+                                <a href="{{ url_for('plans') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-repeat mr-2 text-brand-500"></i>Billing Plans</a>
+                                <a href="{{ url_for('quotation_templates') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-receipt mr-2 text-brand-500"></i>Quote Templates</a>
+                                {% if current_user.role == 'ADMIN' %}
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <a href="{{ url_for('discounts') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-tags mr-2 text-purple-600"></i>Discounts (Admin)</a>
+                                <a href="{{ url_for('taxes') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-percent mr-2 text-teal-600"></i>Tax Rules (Admin)</a>
+                                <a href="{{ url_for('manage_staff') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-user-shield mr-2 text-rose-600"></i>Staff Access (Admin)</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </nav>
+                    {% elif current_user.id and current_user.role == 'CUSTOMER' %}
+                    <nav class="hidden md:flex space-x-3">
+                        <a href="{{ url_for('customer_portal') }}" class="px-3 py-2 rounded-lg text-sm font-medium bg-brand-50 text-brand-700">
+                            <i class="fa-solid fa-user-circle mr-1.5"></i>My Subscriptions & Invoices
+                        </a>
+                    </nav>
+                    {% endif %}
+                </div>
+
+                <!-- Right: User Identity & Actions -->
+                <div class="flex items-center space-x-3">
+                    {% if current_user.id %}
+                        <!-- Role Badge -->
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
+                            {% if current_user.role == 'ADMIN' %} bg-purple-100 text-purple-800 border border-purple-200
+                            {% elif current_user.role == 'STAFF' %} bg-sky-100 text-sky-800 border border-sky-200
+                            {% else %} bg-emerald-100 text-emerald-800 border border-emerald-200 {% endif %}">
+                            <i class="fa-solid {{ 'fa-crown' if current_user.role == 'ADMIN' else 'fa-id-badge' if current_user.role == 'STAFF' else 'fa-user' }} mr-1"></i>
+                            {{ current_user.role }}
+                        </span>
+
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-semibold text-slate-900 leading-none">{{ current_user.name }}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">{{ current_user.email }}</div>
+                        </div>
+
+                        <a href="{{ url_for('logout') }}" title="Logout" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700">Sign in</a>
+                        <a href="{{ url_for('register') }}" class="ml-4 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700">
+                            Create Account
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full no-print">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-3 rounded-xl p-4 border flex items-start space-x-3 shadow-sm
+                        {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800
+                        {% elif category == 'danger' %} bg-rose-50 border-rose-200 text-rose-800
+                        {% elif category == 'warning' %} bg-amber-50 border-amber-200 text-amber-800
+                        {% else %} bg-sky-50 border-sky-200 text-sky-800 {% endif %}">
+                        <i class="fa-solid {{ 'fa-circle-check text-emerald-500' if category == 'success' else 'fa-circle-exclamation text-rose-500' if category == 'danger' else 'fa-triangle-exclamation text-amber-500' if category == 'warning' else 'fa-circle-info text-sky-500' }} mt-0.5 text-lg"></i>
+                        <div class="flex-1 text-sm font-medium">{{ message }}</div>
+                        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+            <div>
+                <strong>Brightloop Software</strong> &copy; 2026. Built for Odoo Cross Makeathon 9.0 (CUSAT).
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex items-center text-emerald-600 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span> Live SQLite Engine
+                </span>
+                <span>Idempotent Billing</span>
+                <span>Role-Based Security</span>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

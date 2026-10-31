@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In / Register | Brightloop Software{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto my-8 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+    
+    <!-- Left Hero Banner -->
+    <div class="md:w-5/12 bg-gradient-to-br from-brand-700 via-brand-800 to-indigo-900 text-white p-8 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-white">
+                    <i class="fa-solid fa-arrows-spin text-xl"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tight">Brightloop</span>
+            </div>
+            <h2 class="text-2xl font-bold leading-snug">The Digital Backbone of Recurring Revenue</h2>
+            <p class="mt-3 text-brand-100 text-sm leading-relaxed">
+                Automate your entire subscription lifecycle: from customized quotations to batch recurring invoicing, automatic discount rules, and real-time MRR analytics.
+            </p>
+        </div>
+
+        <!-- Hackathon Quick-Switch Personas Box for Judges -->
+        <div class="mt-8 bg-white/10 backdrop-blur rounded-xl p-4 border border-white/15">
+            <div class="text-xs font-bold uppercase tracking-wider text-brand-200 mb-2 flex items-center">
+                <i class="fa-solid fa-bolt text-amber-400 mr-1.5"></i> Hackathon Test Accounts
+            </div>
+            <div class="space-y-2 text-xs">
+                <button onclick="fillDemo('admin@brightloop.com', 'Admin@Brightloop1')" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all flex items-center justify-between">
+                    <span class="font-medium">👑 Admin Director</span>
+                    <span class="text-[10px] text-brand-200">Full Control</span>
+                </button>
+                <button onclick="fillDemo('sarah.staff@brightloop.com', 'Staff@Brightloop1')" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all flex items-center justify-between">
+                    <span class="font-medium">💼 Internal Staff</span>
+                    <span class="text-[10px] text-brand-200">Quotes & Billing</span>
+                </button>
+                <button onclick="fillDemo('marcus@cornerretail.com', 'Customer@Brightloop1')" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all flex items-center justify-between">
+                    <span class="font-medium">🏪 Customer Portal</span>
+                    <span class="text-[10px] text-brand-200">Self-Service</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Form Section (Toggle Sign In / Sign Up) -->
+    <div class="md:w-7/12 p-8 sm:p-10">
+        
+        <!-- Tab Switcher -->
+        <div class="flex border-b border-slate-200 mb-6">
+            <button id="tab-login" onclick="showTab('login')" class="pb-3 px-4 font-bold text-sm border-b-2 {{ 'text-slate-400 border-transparent' if register_mode else 'text-brand-600 border-brand-600' }} transition-colors">
+                Sign In
+            </button>
+            <button id="tab-register" onclick="showTab('register')" class="pb-3 px-4 font-bold text-sm border-b-2 {{ 'text-brand-600 border-brand-600' if register_mode else 'text-slate-400 border-transparent' }} transition-colors">
+                New Customer Account
+            </button>
+        </div>
+
+        <!-- 1. Sign In Form -->
+        <div id="form-login" class="{{ 'hidden' if register_mode else '' }}">
+            <h3 class="text-xl font-bold text-slate-900 mb-1">Welcome back</h3>
+            <p class="text-xs text-slate-500 mb-6">Enter your email and password to access the portal.</p>
+
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Work Email</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="email" id="login_email" name="email" required placeholder="you@company.com" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">Password</label>
+                        <a href="{{ url_for('forgot_password') }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Forgot password?</a>
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input type="password" id="login_password" name="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-sm shadow-md shadow-brand-500/20 transition-all flex items-center justify-center space-x-2">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. Sign Up Form (Strict Password Policy) -->
+        <div id="form-register" class="{{ '' if register_mode else 'hidden' }}">
+            <h3 class="text-xl font-bold text-slate-900 mb-1">Create Customer Account</h3>
+            <p class="text-xs text-slate-500 mb-6">Each email belongs to only one account. Password rules enforced.</p>
+
+            <form action="{{ url_for('register') }}" method="POST" class="space-y-3.5" onsubmit="return validateRegisterForm()">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Business / Company Name</label>
+                    <input type="text" name="name" required placeholder="e.g. Acme Tech Solutions" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Work Email</label>
+                    <input type="email" name="email" required placeholder="admin@acme.com" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                    <input type="password" id="reg_password" name="password" required oninput="checkPasswordRules(this.value)" placeholder="At least 9 chars, Uppercase, Lowercase, Special" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <!-- Live Password Rules Checklist (Mandatory hackathon requirement) -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
+                    <div class="font-semibold text-slate-700 mb-1">Password Requirements:</div>
+                    <div id="rule-len" class="text-slate-400 flex items-center"><i class="fa-solid fa-circle-xmark mr-1.5 text-[10px]"></i> More than 8 characters</div>
+                    <div id="rule-upper" class="text-slate-400 flex items-center"><i class="fa-solid fa-circle-xmark mr-1.5 text-[10px]"></i> At least one uppercase letter (A-Z)</div>
+                    <div id="rule-lower" class="text-slate-400 flex items-center"><i class="fa-solid fa-circle-xmark mr-1.5 text-[10px]"></i> At least one lowercase letter (a-z)</div>
+                    <div id="rule-special" class="text-slate-400 flex items-center"><i class="fa-solid fa-circle-xmark mr-1.5 text-[10px]"></i> At least one special character (!@#$%^&*)</div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Confirm Password</label>
+                    <input type="password" name="confirm_password" required placeholder="Re-enter password" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2">
+                    <span>Register Account</span>
+                    <i class="fa-solid fa-check text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showTab(tab) {
+        if (tab === 'login') {
+            document.getElementById('form-login').classList.remove('hidden');
+            document.getElementById('form-register').classList.add('hidden');
+            document.getElementById('tab-login').className = 'pb-3 px-4 font-bold text-sm border-b-2 text-brand-600 border-brand-600 transition-colors';
+            document.getElementById('tab-register').className = 'pb-3 px-4 font-bold text-sm border-b-2 text-slate-400 border-transparent transition-colors';
+        } else {
+            document.getElementById('form-login').classList.add('hidden');
+            document.getElementById('form-register').classList.remove('hidden');
+            document.getElementById('tab-register').className = 'pb-3 px-4 font-bold text-sm border-b-2 text-brand-600 border-brand-600 transition-colors';
+            document.getElementById('tab-login').className = 'pb-3 px-4 font-bold text-sm border-b-2 text-slate-400 border-transparent transition-colors';
+        }
+    }
+
+    function fillDemo(email, pass) {
+        showTab('login');
+        document.getElementById('login_email').value = email;
+        document.getElementById('login_password').value = pass;
+    }
+
+    function checkPasswordRules(val) {
+        const check = (id, valid) => {
+            const el = document.getElementById(id);
+            if (valid) {
+                el.className = 'text-emerald-600 flex items-center font-medium';
+                el.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5 text-[10px]"></i> ' + el.innerText.trim();
+            } else {
+                el.className = 'text-slate-400 flex items-center';
+                el.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1.5 text-[10px]"></i> ' + el.innerText.trim();
+            }
+        };
+
+        check('rule-len', val.length > 8);
+        check('rule-upper', /[A-Z]/.test(val));
+        check('rule-lower', /[a-z]/.test(val));
+        check('rule-special', /[!@#$%^&*(),.?":{}|<>_\-\\\/\[\]]/.test(val));
+    }
+</script>
+{% endblock %}
