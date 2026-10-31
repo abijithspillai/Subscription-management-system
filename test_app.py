@@ -106,6 +106,10 @@ class BrightloopTestCase(unittest.TestCase):
 
     def test_07_upi_instant_payment(self):
         """Verify Innovation 1: Dynamic UPI 1-click settlement"""
+        conn = database.get_db()
+        conn.execute("UPDATE invoices SET status = 'CONFIRMED', amount_paid = 0.0 WHERE id = 3")
+        conn.commit()
+        conn.close()
         # Login as customer (Apex Retail Mart)
         self.client.post('/login', data={
             'email': 'billing@apexretail.in',
