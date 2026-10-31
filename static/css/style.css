@@ -1,5 +1,21 @@
 /* Brightloop Software Custom Stylesheet */
 
+/* Responsive typography & base font defaults */
+html {
+    scroll-behavior: smooth;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Custom interactive card transitions */
+.card-hover {
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+/* Print optimizations for Tax Invoices */
 @media print {
     nav, header, footer, .no-print, button, form.no-print {
         display: none !important;
