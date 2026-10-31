@@ -146,6 +146,8 @@ CREATE TABLE IF NOT EXISTS invoices (
     amount_paid DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     status TEXT CHECK(status IN ('DRAFT', 'CONFIRMED', 'PAID', 'CANCELLED')) NOT NULL DEFAULT 'DRAFT',
     discount_id INTEGER,
+    reminder_count INTEGER NOT NULL DEFAULT 0,
+    last_reminder_date DATETIME,
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE SET NULL,

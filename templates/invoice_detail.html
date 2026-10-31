@@ -48,6 +48,14 @@
                     </button>
                 </form>
 
+                {% if invoice.status == 'CONFIRMED' and invoice.due_date < today.isoformat() %}
+                <form action="{{ url_for('chase_overdue', inv_id=invoice.id) }}" method="POST" class="inline">
+                    <button type="submit" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center">
+                        <i class="fa-solid fa-bolt mr-1 text-amber-300"></i> Chase Overdue (Dunning)
+                    </button>
+                </form>
+                {% endif %}
+
                 {% if invoice.status != 'PAID' and invoice.status != 'CANCELLED' %}
                 <button onclick="document.getElementById('modal-payment').classList.remove('hidden')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
                     <i class="fa-solid fa-qrcode mr-1"></i> Record UPI / Bank Payment
@@ -66,6 +74,26 @@
             {% endif %}
         </div>
     </div>
+
+    {% if invoice.reminder_count > 0 %}
+    <div class="no-print bg-amber-50 text-amber-900 border border-amber-200 rounded-xl p-3 flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-bullhorn text-amber-600 text-sm"></i>
+            <span><strong>Dunning Tracker:</strong> {{ invoice.reminder_count }} payment reminder(s) dispatched to customer via WhatsApp & Email. (Last: {{ invoice.last_reminder_date }}).</span>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-amber-200 text-amber-900 rounded">Active Notice</span>
+    </div>
+    {% endif %}
+
+    {% if invoice.reminder_count > 0 %}
+    <div class="no-print bg-amber-50 text-amber-900 border border-amber-200 rounded-xl p-3 flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-bullhorn text-amber-600 text-sm"></i>
+            <span><strong>Dunning Tracker:</strong> {{ invoice.reminder_count }} payment reminder(s) dispatched to customer via WhatsApp & Email. (Last: {{ invoice.last_reminder_date }}).</span>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-amber-200 text-amber-900 rounded">Active Notice</span>
+    </div>
+    {% endif %}
 
     <!-- Official High-Fidelity Printable GST Tax Invoice -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-10 print:border-none print:shadow-none print:p-0">
@@ -149,18 +177,34 @@
         <!-- Financial Summary Breakdown with GST Split -->
         <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start gap-4">
             
-            <!-- Left: Payment Instructions -->
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs w-full sm:w-72">
-                <div class="font-bold text-slate-800 uppercase tracking-wider text-[10px] mb-2 flex items-center">
-                    <i class="fa-solid fa-credit-card text-emerald-600 mr-1.5"></i> Payment Instructions
+            <!-- Left: Dynamic UPI QR Code & Instructions -->
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs w-full sm:w-80 space-y-3">
+                <div class="font-bold text-slate-800 uppercase tracking-wider text-[10px] flex items-center justify-between">
+                    <span class="flex items-center"><i class="fa-solid fa-qrcode text-emerald-600 mr-1.5"></i> UPI Settlement & Instructions</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Instant</span>
                 </div>
-                <div class="space-y-1 text-slate-600 text-[11px]">
-                    <div>Please remit payment by due date.</div>
-                    <div>Supported methods: <strong>UPI</strong>, <strong>NetBanking</strong>, <strong>Card</strong></div>
-                    <div class="mt-2 pt-2 border-t border-slate-200 text-slate-500">
-                        Include invoice reference <strong>{{ invoice.invoice_number }}</strong> in payment notes.
-                    </div>
+
+                {% set balance = invoice.total_amount - invoice.amount_paid %}
+                {% if balance > 0 %}
+                {% set upi_uri = "upi://pay?pa=brightloop@icici&pn=Brightloop&am=" ~ "{:.2f}".format(balance) ~ "&cu=INR&tr=" ~ invoice.invoice_number ~ "&tn=Invoice_" ~ invoice.invoice_number %}
+                <div class="flex flex-col items-center p-2.5 bg-white rounded-xl border border-slate-200">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ upi_uri|urlencode }}" alt="UPI QR" class="w-32 h-32 rounded-lg p-1">
+                    <span class="text-[10px] text-slate-500 mt-1">Scan via GPay / PhonePe / Paytm</span>
+                    <span class="font-mono text-[11px] font-bold text-slate-800">brightloop@icici</span>
                 </div>
+
+                <form action="{{ url_for('pay_upi', inv_id=invoice.id) }}" method="POST" class="no-print">
+                    <button type="submit" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-bolt text-amber-300"></i>
+                        <span>Simulate Instant UPI (₹{{ "{:,.2f}".format(balance) }})</span>
+                    </button>
+                </form>
+                {% else %}
+                <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-center font-bold text-xs flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Invoice Fully Settled (Balance: ₹0.00)</span>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Right: GST Breakdown & Total -->

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="space-y-8 max-w-6xl mx-auto">
 
-    <!-- Welcome Hero -->
+    <!-- Welcome Hero with Customer Identity -->
     <div class="bg-gradient-to-r from-brand-700 via-indigo-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <div>
             <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur border border-white/20 text-brand-100 mb-2">
@@ -13,17 +13,54 @@
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight">Welcome, {{ current_user.name }}</h1>
             <p class="text-brand-100 text-xs sm:text-sm mt-1 max-w-xl leading-relaxed">
-                Review your active Brightloop software contracts, inspect billing schedules, and download or settle your recurring invoices without waiting on customer support.
+                Review your active Brightloop software contracts, self-upgrade your plans, and settle invoices with 1-click UPI payments.
             </p>
         </div>
 
-        <div class="text-right">
-            <span class="text-xs uppercase tracking-wider text-brand-200 block font-bold">Account Holder</span>
-            <span class="text-sm font-semibold font-mono text-white">{{ current_user.email }}</span>
+        <div class="text-right bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/15">
+            <span class="text-[10px] uppercase tracking-wider text-brand-200 block font-bold">Authorized Account</span>
+            <span class="text-sm font-semibold font-mono text-white block">{{ current_user.email }}</span>
+            <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-400/30">
+                Verified Customer
+            </span>
         </div>
     </div>
 
-    <!-- Section 1: My Subscriptions -->
+    <!-- Quick Financial Health Cards for Customer -->
+    {% set total_invoiced = invoices|sum(attribute='total_amount') %}
+    {% set total_paid = invoices|sum(attribute='amount_paid') %}
+    {% set total_due = total_invoiced - total_paid %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Card 1: Active Subscriptions -->
+        <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Active Subscriptions</span>
+            <div class="text-2xl font-black text-slate-900 mt-1 font-mono">{{ subscriptions|length }}</div>
+            <span class="text-xs text-slate-400 mt-1 block">Recurring business licenses</span>
+        </div>
+
+        <!-- Card 2: Total Paid to Date -->
+        <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Settled (Paid)</span>
+            <div class="text-2xl font-black text-emerald-600 mt-1 font-mono">₹{{ "{:,.2f}".format(total_paid) }}</div>
+            <span class="text-xs text-emerald-600 font-semibold mt-1 block flex items-center">
+                <i class="fa-solid fa-circle-check mr-1 text-xs"></i> All receipts reconciled
+            </span>
+        </div>
+
+        <!-- Card 3: Pending Balance -->
+        <div class="p-5 bg-white rounded-2xl border {{ 'border-rose-300 bg-rose-50/20' if total_due > 0 else 'border-slate-200' }} shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider {{ 'text-rose-600' if total_due > 0 else 'text-slate-500' }}">Outstanding Balance</span>
+            <div class="text-2xl font-black {{ 'text-rose-600' if total_due > 0 else 'text-slate-900' }} mt-1 font-mono">
+                ₹{{ "{:,.2f}".format(total_due) }}
+            </div>
+            <span class="text-xs {{ 'text-rose-600 font-bold' if total_due > 0 else 'text-slate-400' }} mt-1 block">
+                {{ 'Payment due immediately' if total_due > 0 else 'No pending dues' }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Section 1: My Subscriptions & Self-Service Upgrades (Innovation 4) -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-5 border-b border-slate-200 flex items-center justify-between">
             <div class="flex items-center space-x-2">
@@ -38,13 +75,14 @@
         <table class="w-full text-left text-sm">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
                 <tr>
-                    <th class="px-6 py-3.5">Subscription #</th>
+                    <th class="px-6 py-3.5">Contract #</th>
                     <th class="px-6 py-3.5">Plan</th>
                     <th class="px-6 py-3.5">Frequency</th>
                     <th class="px-6 py-3.5">Start Date</th>
                     <th class="px-6 py-3.5">Next Renewal</th>
                     <th class="px-6 py-3.5 text-right">Cycle Cost</th>
                     <th class="px-6 py-3.5 text-center">Status</th>
+                    <th class="px-6 py-3.5 text-right">Self-Service</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -64,10 +102,19 @@
                             {{ sub.status }}
                         </span>
                     </td>
+                    <td class="px-6 py-4 text-right">
+                        {% if sub.status == 'ACTIVE' %}
+                        <button onclick="openUpgradeModal('{{ sub.id }}', '{{ sub.plan_id }}', '{{ sub.sub_number }}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition-all flex items-center float-right">
+                            <i class="fa-solid fa-arrow-up-right-dots mr-1"></i> Upgrade / Add-On
+                        </button>
+                        {% else %}
+                        <span class="text-slate-400 italic text-[11px]">-</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-slate-400 text-xs">
+                    <td colspan="8" class="px-6 py-8 text-center text-slate-400 text-xs">
                         You do not have any active subscriptions yet.
                     </td>
                 </tr>
@@ -76,14 +123,14 @@
         </table>
     </div>
 
-    <!-- Section 2: My Invoices & Receipts -->
+    <!-- Section 2: My Invoices & Instant UPI Payment (Innovation 1) -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-5 border-b border-slate-200 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-receipt text-brand-600 text-lg"></i>
                 <h2 class="font-bold text-slate-900 text-base">My Invoices & Payment Receipts</h2>
             </div>
-            <span class="text-xs text-slate-500 font-medium">Download PDF or settle outstanding invoices</span>
+            <span class="text-xs text-slate-500 font-medium">Download tax invoices or pay instantly with UPI QR</span>
         </div>
 
         <table class="w-full text-left text-sm">
@@ -127,9 +174,9 @@
                             View / Print
                         </a>
                         {% if balance > 0 %}
-                        <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold">
-                            Pay ₹{{ "{:,.2f}".format(balance) }}
-                        </a>
+                        <button onclick="openUpiModal('{{ inv.id }}', '{{ inv.invoice_number }}', '{{ balance }}')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md shadow-emerald-500/20 inline-flex items-center">
+                            <i class="fa-solid fa-qrcode mr-1.5 text-xs"></i> Pay ₹{{ "{:,.2f}".format(balance) }}
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
@@ -145,4 +192,111 @@
     </div>
 
 </div>
+
+<!-- Modal 1: Dynamic UPI QR Code & 1-Click Instant Pay (Innovation 1) -->
+<div id="modal-upi-pay" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 text-center">
+        <div class="flex justify-between items-center mb-3">
+            <div class="flex items-center space-x-1.5 text-slate-800 font-bold text-sm">
+                <i class="fa-solid fa-qrcode text-emerald-600"></i>
+                <span>Instant UPI Payment</span>
+            </div>
+            <button onclick="document.getElementById('modal-upi-pay').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 mb-4">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Invoice Reference</span>
+            <div id="upi-inv-number" class="text-sm font-mono font-bold text-brand-700">INV-2026-0001</div>
+            <div class="text-2xl font-black text-slate-900 font-mono mt-1" id="upi-display-amount">₹0.00</div>
+            <span class="text-[10px] text-emerald-600 font-bold">Zero Transaction Fees &bull; Instant Settlement</span>
+        </div>
+
+        <!-- Dynamic QR Code -->
+        <div class="flex justify-center mb-3">
+            <img id="upi-qr-image" src="" alt="UPI QR Code" class="w-48 h-48 rounded-2xl border border-slate-200 p-2 shadow-inner bg-white">
+        </div>
+
+        <div class="text-xs text-slate-500 mb-4 space-y-1">
+            <div>Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)</div>
+            <div class="font-mono text-[11px] font-bold text-slate-700">UPI ID: brightloop@icici</div>
+        </div>
+
+        <!-- Simulate / Execute 1-Click UPI Payment -->
+        <form id="form-upi-pay" action="" method="POST">
+            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-bolt text-amber-300"></i>
+                <span>Simulate Instant UPI Success</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 2: Customer Self-Service Upgrade / Switch Plan (Innovation 4) -->
+<div id="modal-upgrade" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900">Upgrade or Switch Subscription</h3>
+                <span id="upgrade-sub-num" class="text-xs font-mono text-brand-600 font-bold"></span>
+            </div>
+            <button onclick="document.getElementById('modal-upgrade').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form id="form-upgrade" action="" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Select New Plan Cadence</label>
+                <select name="new_plan_id" id="upgrade-plan-select" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand-500">
+                    {% for p in all_plans %}
+                    <option value="{{ p.id }}">{{ p.name }} - ₹{{ "{:,.2f}".format(p.cost) }} / {{ p.billing_cycle.lower() }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Odoo Brand Variant Toggle -->
+            <div class="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                <label class="flex items-start space-x-2.5 cursor-pointer">
+                    <input type="checkbox" name="enable_odoo_variant" value="1" checked class="mt-0.5 rounded text-purple-600 focus:ring-purple-500 h-4 w-4">
+                    <div>
+                        <span class="text-xs font-bold text-purple-900 block">Include Odoo Brand Integration (+₹560.00 / mo)</span>
+                        <span class="text-[11px] text-purple-700 mt-0.5 block leading-snug">Adds official Odoo brand support and certified enterprise connector variants.</span>
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 transition-all flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-check"></i>
+                <span>Confirm Subscription Update</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openUpiModal(invId, invNumber, balanceAmount) {
+        document.getElementById('upi-inv-number').innerText = invNumber;
+        document.getElementById('upi-display-amount').innerText = '₹' + parseFloat(balanceAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById('form-upi-pay').action = `/invoices/${invId}/pay-upi`;
+
+        // Generate standard UPI QR URI
+        const upiPayload = `upi://pay?pa=brightloop@icici&pn=Brightloop&am=${parseFloat(balanceAmount).toFixed(2)}&cu=INR&tr=${invNumber}&tn=Invoice_${invNumber}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiPayload)}`;
+        document.getElementById('upi-qr-image').src = qrUrl;
+
+        document.getElementById('modal-upi-pay').classList.remove('hidden');
+    }
+
+    function openUpgradeModal(subId, currentPlanId, subNum) {
+        document.getElementById('upgrade-sub-num').innerText = subNum;
+        document.getElementById('upgrade-plan-select').value = currentPlanId;
+        document.getElementById('form-upgrade').action = `/portal/upgrade-subscription/${subId}`;
+        document.getElementById('modal-upgrade').classList.remove('hidden');
+    }
+</script>
 {% endblock %}

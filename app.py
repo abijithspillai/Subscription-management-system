@@ -2,7 +2,10 @@ import re
 import os
 from datetime import datetime, date, timedelta
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, abort
+import csv
+import io
+import secrets
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, abort, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 import database
 
@@ -282,6 +285,25 @@ def dashboard():
     mrr = mrr_row['computed_mrr'] or 0.0
     arr = mrr * 12.0
 
+    # Collection Efficiency %
+    total_inv = rev_stats['total_invoiced'] or 0.0
+    total_col = rev_stats['total_collected'] or 0.0
+    collection_eff = round((total_col / total_inv * 100.0), 1) if total_inv > 0 else 100.0
+
+    # Subscription Retention / Churn %
+    total_subs_count = conn.execute("SELECT COUNT(*) FROM subscriptions").fetchone()[0]
+    retention_rate = round((active_subs_count / total_subs_count * 100.0), 1) if total_subs_count > 0 else 100.0
+    churn_rate = round(100.0 - retention_rate, 1)
+
+    # Odoo Brand Surcharge Revenue
+    odoo_surcharge_rev = conn.execute("""
+        SELECT COALESCE(SUM(v.price_surcharge * l.quantity), 0)
+        FROM subscription_lines l
+        JOIN product_variants v ON l.variant_id = v.id
+        JOIN subscriptions s ON l.subscription_id = s.id
+        WHERE v.variant_name LIKE '%Odoo%' AND s.status = 'ACTIVE'
+    """).fetchone()[0] or 0.0
+
     # 5. Due for billing right now
     due_for_billing = conn.execute("""
         SELECT COUNT(*) FROM subscriptions 
@@ -313,6 +335,10 @@ def dashboard():
         active_subs=active_subs_count,
         mrr=round(mrr, 2),
         arr=round(arr, 2),
+        collection_eff=collection_eff,
+        retention_rate=retention_rate,
+        churn_rate=churn_rate,
+        odoo_surcharge_rev=round(odoo_surcharge_rev, 2),
         total_collected=round(rev_stats['total_collected'], 2),
         total_outstanding=round(rev_stats['total_outstanding'], 2),
         overdue_count=overdue_stats['overdue_count'],
@@ -1038,12 +1064,247 @@ def customer_portal():
         ORDER BY i.id DESC
     """, (user_id,)).fetchall()
 
+    all_plans = conn.execute("SELECT * FROM plans WHERE is_active = 1").fetchall()
     conn.close()
-    return render_template('portal.html', subscriptions=subs, invoices=invoices)
+    return render_template('portal.html', subscriptions=subs, invoices=invoices, all_plans=all_plans)
 
 # -------------------------------------------------------------
+
+# -------------------------------------------------------------
+# INNOVATION 1: DYNAMIC UPI 1-CLICK INSTANT PAYMENT
+# -------------------------------------------------------------
+
+@app.route('/invoices/<int:inv_id>/pay-upi', methods=['POST'])
+@login_required
+def pay_upi(inv_id):
+    conn = database.get_db()
+    inv = conn.execute("SELECT * FROM invoices WHERE id = ?", (inv_id,)).fetchone()
+    if not inv:
+        flash("Invoice not found.", "danger")
+        conn.close()
+        return redirect(url_for('invoices'))
+
+    # Ownership check for customer role
+    if session.get('role') == 'CUSTOMER' and inv['customer_id'] != session.get('user_id'):
+        flash("Unauthorized payment attempt.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    remaining = round(inv['total_amount'] - inv['amount_paid'], 2)
+    if remaining <= 0:
+        flash("This invoice is already fully paid.", "info")
+        conn.close()
+        if session.get('role') == 'CUSTOMER':
+            return redirect(url_for('customer_portal'))
+        return redirect(url_for('invoice_detail', inv_id=inv_id))
+
+    today_str = date.today().isoformat()
+    pay_number = f"PAY-UPI-{secrets.token_hex(4).upper()}"
+    upi_txn_ref = f"UPI{int(datetime.now().timestamp())}"
+
+    # Record payment
+    conn.execute("""
+        INSERT INTO payments (payment_number, invoice_id, amount, payment_date, payment_method, note, recorded_by)
+        VALUES (?, ?, ?, ?, 'UPI', ?, ?)
+    """, (pay_number, inv_id, remaining, today_str, f"Instant Settlement via Dynamic UPI QR (Ref: {upi_txn_ref})", session.get('user_id')))
+
+    # Mark invoice as PAID
+    conn.execute("""
+        UPDATE invoices 
+        SET amount_paid = total_amount, status = 'PAID'
+        WHERE id = ?
+    """, (inv_id,))
+
+    conn.commit()
+    conn.close()
+
+    flash(f"Payment of ₹{remaining:,.2f} received instantly via UPI (Ref: {upi_txn_ref}). Invoice {inv['invoice_number']} marked PAID.", "success")
+    if session.get('role') == 'CUSTOMER':
+        return redirect(url_for('customer_portal'))
+    return redirect(url_for('invoice_detail', inv_id=inv_id))
+
+# -------------------------------------------------------------
+# INNOVATION 2: 1-CLICK AUTOMATED OVERDUE CHASER (DUNNING)
+# -------------------------------------------------------------
+
+@app.route('/invoices/<int:inv_id>/chase-overdue', methods=['POST'])
+@role_required(['ADMIN', 'STAFF'])
+def chase_overdue(inv_id):
+    conn = database.get_db()
+    inv = conn.execute("""
+        SELECT i.*, u.name as customer_name, u.email as customer_email 
+        FROM invoices i 
+        JOIN users u ON i.customer_id = u.id 
+        WHERE i.id = ?
+    """, (inv_id,)).fetchone()
+
+    if not inv:
+        flash("Invoice not found.", "danger")
+        conn.close()
+        return redirect(url_for('invoices'))
+
+    new_count = (inv['reminder_count'] or 0) + 1
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn.execute("""
+        UPDATE invoices 
+        SET reminder_count = ?, last_reminder_date = ? 
+        WHERE id = ?
+    """, (new_count, now_str, inv_id))
+    conn.commit()
+    conn.close()
+
+    ordinal = "1st" if new_count == 1 else ("2nd" if new_count == 2 else ("3rd" if new_count == 3 else f"{new_count}th"))
+    flash(f"⚡ {ordinal} Overdue Payment Reminder dispatched to {inv['customer_name']} ({inv['customer_email']}) via WhatsApp & Email for invoice {inv['invoice_number']}.", "success")
+    return redirect(url_for('invoice_detail', inv_id=inv_id))
+
+# -------------------------------------------------------------
+# INNOVATION 4: CUSTOMER SELF-SERVICE PLAN UPGRADE & ADD-ONS
+# -------------------------------------------------------------
+
+@app.route('/portal/upgrade-subscription/<int:sub_id>', methods=['POST'])
+@login_required
+def upgrade_subscription(sub_id):
+    conn = database.get_db()
+    sub = conn.execute("SELECT * FROM subscriptions WHERE id = ?", (sub_id,)).fetchone()
+    
+    if not sub:
+        flash("Subscription not found.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+        
+    if session.get('role') == 'CUSTOMER' and sub['customer_id'] != session.get('user_id'):
+        flash("Access denied.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    new_plan_id = int(request.form.get('new_plan_id', sub['plan_id']))
+    enable_odoo_variant = request.form.get('enable_odoo_variant') == '1'
+
+    plan = conn.execute("SELECT * FROM plans WHERE id = ?", (new_plan_id,)).fetchone()
+    if not plan:
+        flash("Selected plan not found.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    # Update subscription plan
+    conn.execute("UPDATE subscriptions SET plan_id = ? WHERE id = ?", (new_plan_id, sub_id))
+
+    # Toggle Odoo variant
+    odoo_var = conn.execute("SELECT * FROM product_variants WHERE variant_name LIKE '%Odoo%' LIMIT 1").fetchone()
+    if odoo_var:
+        existing_odoo = conn.execute("SELECT * FROM subscription_lines WHERE subscription_id = ? AND variant_id = ?", (sub_id, odoo_var['id'])).fetchone()
+        if enable_odoo_variant and not existing_odoo:
+            conn.execute("""
+                INSERT INTO subscription_lines (subscription_id, product_id, variant_id, quantity, unit_price, tax_rate)
+                VALUES (?, ?, ?, 1, ?, 18.0)
+            """, (sub_id, odoo_var['product_id'], odoo_var['id'], odoo_var['price_surcharge']))
+        elif not enable_odoo_variant and existing_odoo:
+            conn.execute("DELETE FROM subscription_lines WHERE subscription_id = ? AND variant_id = ?", (sub_id, odoo_var['id']))
+
+    conn.commit()
+    conn.close()
+
+    flash(f"Subscription updated successfully to plan '{plan['name']}'{' with Odoo Brand Integration' if enable_odoo_variant else ''}.", "success")
+    return redirect(url_for('customer_portal'))
+
+# -------------------------------------------------------------
+# INNOVATION 5: 1-CLICK CSV FINANCIAL EXPORT (AUDIT READY)
+# -------------------------------------------------------------
+
+@app.route('/invoices/export-csv')
+@role_required(['ADMIN', 'STAFF'])
+def export_invoices_csv():
+    conn = database.get_db()
+    invoices = conn.execute("""
+        SELECT i.*, u.name as customer_name, u.email as customer_email, s.sub_number
+        FROM invoices i
+        JOIN users u ON i.customer_id = u.id
+        LEFT JOIN subscriptions s ON i.subscription_id = s.id
+        ORDER BY i.id DESC
+    """).fetchall()
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Invoice Number", "Subscription Ref", "Customer Name", "Customer Email",
+        "Invoice Date", "Due Date", "Taxable Subtotal (INR)", "Tax Total (INR)",
+        "Discount Total (INR)", "Total Amount (INR)", "Amount Paid (INR)",
+        "Balance Due (INR)", "Status", "Reminders Sent"
+    ])
+
+    for inv in invoices:
+        balance = inv['total_amount'] - inv['amount_paid']
+        writer.writerow([
+            inv['invoice_number'],
+            inv['sub_number'] or "Manual / Ad-hoc",
+            inv['customer_name'],
+            inv['customer_email'],
+            inv['invoice_date'],
+            inv['due_date'],
+            f"{inv['subtotal']:.2f}",
+            f"{inv['tax_total']:.2f}",
+            f"{inv['discount_total']:.2f}",
+            f"{inv['total_amount']:.2f}",
+            f"{inv['amount_paid']:.2f}",
+            f"{balance:.2f}",
+            inv['status'],
+            inv['reminder_count'] or 0
+        ])
+
+    csv_data = output.getvalue()
+    filename = f"brightloop_invoices_{date.today().isoformat()}.csv"
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@app.route('/subscriptions/export-csv')
+@role_required(['ADMIN', 'STAFF'])
+def export_subscriptions_csv():
+    conn = database.get_db()
+    subs = conn.execute("""
+        SELECT s.*, u.name as customer_name, u.email as customer_email, p.name as plan_name, p.billing_cycle,
+               COALESCE((SELECT SUM(l.quantity * l.unit_price) FROM subscription_lines l WHERE l.subscription_id = s.id), 0) as subtotal
+        FROM subscriptions s
+        JOIN users u ON s.customer_id = u.id
+        JOIN plans p ON s.plan_id = p.id
+        ORDER BY s.id DESC
+    """).fetchall()
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Subscription Number", "Customer Name", "Customer Email", "Plan Name",
+        "Billing Cycle", "Start Date", "Next Renewal Date", "Status", "Cycle Subtotal (INR)"
+    ])
+
+    for s in subs:
+        writer.writerow([
+            s['sub_number'],
+            s['customer_name'],
+            s['customer_email'],
+            s['plan_name'],
+            s['billing_cycle'],
+            s['start_date'],
+            s['next_billing_date'],
+            s['status'],
+            f"{s['subtotal']:.2f}"
+        ])
+
+    csv_data = output.getvalue()
+    filename = f"brightloop_subscriptions_{date.today().isoformat()}.csv"
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 # APP RUNNER
 # -------------------------------------------------------------
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

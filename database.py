@@ -17,6 +17,17 @@ def init_db():
     with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
         conn.executescript(f.read())
     conn.commit()
+
+    try:
+        conn.execute("ALTER TABLE invoices ADD COLUMN reminder_count INTEGER NOT NULL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        conn.execute("ALTER TABLE invoices ADD COLUMN last_reminder_date DATETIME")
+    except sqlite3.OperationalError:
+        pass
+    conn.commit()
+
     seed_data(conn)
     conn.close()
 
@@ -39,7 +50,7 @@ def seed_data(conn):
     users = [
         ("Admin Director", "admin@brightloop.com", admin_pw, "ADMIN"),
         ("Sarah Jenkins (Sales)", "sarah.staff@brightloop.com", staff_pw, "STAFF"),
-        ("Marcus Vance (Small Shop)", "marcus@cornerretail.com", cust_pw1, "CUSTOMER"),
+        ("Apex Retail Mart", "billing@apexretail.in", cust_pw1, "CUSTOMER"),
         ("Global Logistics Corp", "billing@globallogistics.com", cust_pw2, "CUSTOMER")
     ]
     cursor.executemany(
@@ -74,10 +85,10 @@ def seed_data(conn):
     # 4. Plans
     today = date.today()
     plans = [
-        ("Starter Growth", 149.00, "MONTHLY", 1, today, today + timedelta(days=365), "CAN_RENEW_PAUSE", 1),
-        ("Enterprise Annual SLA", 1800.00, "YEARLY", 5, today, today + timedelta(days=730), "CAN_RENEW_PAUSE", 1),
-        ("Weekly Fast-Track", 49.00, "WEEKLY", 1, today, today + timedelta(days=90), "AUTO_CLOSE", 1),
-        ("Daily High-Volume Compute", 19.00, "DAILY", 2, today, today + timedelta(days=60), "AUTO_CLOSE", 1)
+        ("Growth Plan (Monthly)", 149.00, "MONTHLY", 1, today, today + timedelta(days=365), "CAN_RENEW_PAUSE", 1),
+        ("Enterprise Plan (Yearly)", 1800.00, "YEARLY", 5, today, today + timedelta(days=730), "CAN_RENEW_PAUSE", 1),
+        ("Starter Plan (Weekly)", 49.00, "WEEKLY", 1, today, today + timedelta(days=90), "AUTO_CLOSE", 1),
+        ("Daily Pass", 19.00, "DAILY", 2, today, today + timedelta(days=60), "AUTO_CLOSE", 1)
     ]
     cursor.executemany(
         "INSERT INTO plans (name, cost, billing_cycle, min_quantity, start_date, end_date, closure_rule, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",

@@ -100,26 +100,39 @@ http://127.0.0.1:5000
 
 ---
 
-## 5. Demo Test Credentials (Ready for Evaluators)
+
+---
+
+## 5. Hackathon Innovation Features (Beyond Requirements)
+
+In addition to the mandatory problem statement specifications, this platform includes 5 production-grade business innovations:
+
+1. **⚡ Dynamic UPI QR Code & 1-Click Instant Payment:** Real-time scannable UPI QR code (conforming to NPCI standard) generated on customer invoices with 1-click simulated instant settlement.
+2. **📢 1-Click Automated Overdue Chaser (Dunning System):** Built-in reminder escalation engine simulating WhatsApp & Email dunning notices directly addressing lost revenue prevention.
+3. **📊 Executive Financial Cockpit (ARR, Churn %, Collection Rate):** Deep SaaS financial metrics including Annual Run-Rate (ARR = MRR × 12), Collection Efficiency %, and Odoo Brand Surcharge Margin.
+4. **🔄 Customer Self-Service Plan Upgrades & Add-Ons:** Allows customers to self-upgrade cadence (Monthly ➔ Yearly) and toggle Odoo Brand integration directly from their portal without emailing support.
+5. **📥 1-Click CSV Financial Exports:** Export audit-ready datasets of Invoices and Subscriptions for Tally, Zoho Books, or Odoo Accounting.
+
+## 6. Demo Test Credentials (Ready for Evaluators)
 
 | Role | Email | Password | Purpose |
 | :--- | :--- | :--- | :--- |
 | **👑 Admin Director** | `admin@brightloop.com` | `Admin@Brightloop1` | Full administrative access, staff creation, discount rules, finance cockpit |
 | **💼 Internal Staff** | `sarah.staff@brightloop.com` | `Staff@Brightloop1` | Operational execution: quotes, billing run, invoice actions, payments |
-| **🏪 Customer** | `marcus@cornerretail.com` | `Customer@Brightloop1` | Self-service portal: view own subscriptions, print invoices, pay online |
+| **🏪 Customer** | `billing@apexretail.in` | `Customer@Brightloop1` | Self-service portal: view own subscriptions, print invoices, pay online |
 
 *Tip: The Sign In page features 1-click demo credential autofill buttons for convenience.*
 
 ---
 
-## 6. Demonstration & Evaluation Walkthrough
+## 7. Demonstration & Evaluation Walkthrough
 
 Follow this 5-minute walkthrough during your presentation:
 
 1. **Sign In as Admin:** Inspect the **Executive Finance Cockpit** showing real-time MRR, ARR, active contracts, and overdue receivables.
-2. **Review Products & Variants:** Go to **Catalog & Rules ➔ Products & Variants**. Notice the *Brightloop Business ERP* product with the *Odoo Brand Integration* variant (+ $560.00 surcharge).
+2. **Review Products & Variants:** Go to **Catalog & Rules ➔ Products & Variants**. Notice the *Brightloop Business ERP* product with the *Odoo Brand Integration* variant (+ ₹560.00 surcharge).
 3. **Inspect Quotation to Subscription:** Go to **Subscriptions**. Open `SUB-2026-0003` to show the lifecycle stepper (`Draft` ➔ `Quotation` ➔ `Confirmed` ➔ `Active`).
 4. **Execute Billing Day:** Go to **Billing Day**. Notice the subscriptions due for renewal today. Click **"Run Batch Billing Now"**. Verify that invoices are automatically generated and no duplicate charges occur.
 5. **Inspect & Print Invoice:** Open any generated invoice. Demonstrate the automated tax calculation, applied discount deduction, and click **"Print Invoice"** to show the professional PDF invoice layout.
 6. **Record Payment & Reconciliation:** Record a partial or full payment on an invoice (e.g., via Bank Transfer or UPI). Watch the invoice balance update instantly to `Paid`.
-7. **Switch to Customer Portal:** Log out and log in as `marcus@cornerretail.com`. Demonstrate that the customer sees **only** their own contracts and invoices, with self-service payment options.
+7. **Switch to Customer Portal:** Log out and log in as `billing@apexretail.in`. Demonstrate that the customer sees **only** their own contracts and invoices, with self-service payment options.

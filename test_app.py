@@ -39,12 +39,12 @@ class BrightloopTestCase(unittest.TestCase):
     def test_03_customer_portal_isolation(self):
         """Verify customer portal only displays the logged-in customer's records"""
         response = self.client.post('/login', data={
-            'email': 'marcus@cornerretail.com',
+            'email': 'billing@apexretail.in',
             'password': 'Customer@Brightloop1'
         }, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Customer Self-Service Portal', response.data)
-        self.assertIn(b'Marcus Vance (Small Shop)', response.data)
+        self.assertIn(b'Apex Retail Mart', response.data)
 
         # Ensure customer cannot access Admin/Staff routes
         dashboard_resp = self.client.get('/dashboard', follow_redirects=True)
@@ -103,6 +103,65 @@ class BrightloopTestCase(unittest.TestCase):
         }, follow_redirects=True)
         # Should not have created the product
         self.assertNotIn(b'Product created successfully', response.data)
+
+    def test_07_upi_instant_payment(self):
+        """Verify Innovation 1: Dynamic UPI 1-click settlement"""
+        # Login as customer (Apex Retail Mart)
+        self.client.post('/login', data={
+            'email': 'billing@apexretail.in',
+            'password': 'Customer@Brightloop1'
+        }, follow_redirects=True)
+
+        # Trigger UPI 1-click settlement for invoice #1
+        response = self.client.post('/invoices/3/pay-upi', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'via UPI', response.data)
+
+    def test_08_chase_overdue_invoice(self):
+        """Verify Innovation 2: 1-Click Automated Overdue Chaser (Dunning System)"""
+        # Login as staff
+        self.client.post('/login', data={
+            'email': 'sarah.staff@brightloop.com',
+            'password': 'Staff@Brightloop1'
+        }, follow_redirects=True)
+
+        # Trigger overdue reminder for invoice #2
+        response = self.client.post('/invoices/2/chase-overdue', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Overdue Payment Reminder', response.data)
+
+    def test_09_customer_plan_upgrade(self):
+        """Verify Innovation 4: Customer self-service subscription upgrade and Odoo toggle"""
+        # Login as customer
+        self.client.post('/login', data={
+            'email': 'billing@apexretail.in',
+            'password': 'Customer@Brightloop1'
+        }, follow_redirects=True)
+
+        # Upgrade subscription #1 to Plan 2 (Enterprise Annual) with Odoo variant
+        response = self.client.post('/portal/upgrade-subscription/1', data={
+            'new_plan_id': '2',
+            'enable_odoo_variant': '1'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Subscription updated successfully', response.data)
+
+    def test_10_csv_exports(self):
+        """Verify Innovation 5: 1-Click CSV Financial Exports for Invoices and Subscriptions"""
+        # Login as admin
+        self.client.post('/login', data={
+            'email': 'admin@brightloop.com',
+            'password': 'Admin@Brightloop1'
+        }, follow_redirects=True)
+
+        inv_csv = self.client.get('/invoices/export-csv')
+        self.assertEqual(inv_csv.status_code, 200)
+        self.assertIn(b'Invoice Number', inv_csv.data)
+
+        sub_csv = self.client.get('/subscriptions/export-csv')
+        self.assertEqual(sub_csv.status_code, 200)
+        self.assertIn(b'Subscription Number', sub_csv.data)
+
 
 if __name__ == '__main__':
     unittest.main()

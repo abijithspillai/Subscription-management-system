@@ -15,11 +15,14 @@
             <p class="text-xs text-slate-500 mt-1">Manage recurring software agreements from quote proposal to active billing and renewal.</p>
         </div>
         <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+            <a href="{{ url_for('export_subscriptions_csv') }}" class="inline-flex items-center px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition-all">
+                <i class="fa-solid fa-file-csv mr-1.5"></i> Export CSV
+            </a>
             <a href="{{ url_for('new_subscription') }}" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 transition-all">
-                <i class="fa-solid fa-plus mr-1.5"></i> Create New Quote / Contract
+                <i class="fa-solid fa-plus mr-1.5"></i> Create New Quote
             </a>
             <a href="{{ url_for('billing_dashboard') }}" class="inline-flex items-center px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all">
-                <i class="fa-solid fa-bolt mr-1.5 text-amber-400"></i> Go to Billing Day &rarr;
+                <i class="fa-solid fa-bolt mr-1.5 text-amber-400"></i> Billing Day &rarr;
             </a>
         </div>
     </div>

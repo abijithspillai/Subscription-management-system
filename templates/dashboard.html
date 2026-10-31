@@ -173,6 +173,66 @@
 
     </div>
 
+    <!-- Executive Financial Health & Boardroom Metrics (Innovation 3) -->
+    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-slate-800">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-3">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-brand-300 flex items-center">
+                    <i class="fa-solid fa-chart-line text-emerald-400 mr-1.5"></i> Executive Financial Health & Audit Cockpit
+                </span>
+                <h3 class="text-base font-bold text-white mt-0.5">Recurring Revenue, Efficiency & Surcharge Analytics</h3>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ url_for('export_invoices_csv') }}" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-all border border-white/20 flex items-center">
+                    <i class="fa-solid fa-file-arrow-down mr-1.5 text-emerald-400"></i> Export Invoices (CSV)
+                </a>
+                <a href="{{ url_for('export_subscriptions_csv') }}" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-all border border-white/20 flex items-center">
+                    <i class="fa-solid fa-file-csv mr-1.5 text-sky-400"></i> Export Contracts (CSV)
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+            <!-- ARR -->
+            <div class="p-4 bg-white/5 rounded-xl border border-white/10 flex flex-col justify-between">
+                <span class="text-[11px] text-slate-400 block uppercase font-bold tracking-wider">Annual Run-Rate (ARR)</span>
+                <div class="text-xl sm:text-2xl font-black text-white mt-2 font-mono">₹{{ "{:,.2f}".format(arr) }}</div>
+                <span class="text-[10px] text-emerald-400 font-semibold mt-2 block flex items-center">
+                    <i class="fa-solid fa-arrow-trend-up mr-1"></i> MRR &times; 12 Projection
+                </span>
+            </div>
+
+            <!-- Collection Efficiency -->
+            <div class="p-4 bg-white/5 rounded-xl border border-white/10 flex flex-col justify-between">
+                <span class="text-[11px] text-slate-400 block uppercase font-bold tracking-wider">Collection Efficiency</span>
+                <div class="text-xl sm:text-2xl font-black text-emerald-400 mt-2 font-mono">{{ collection_eff }}%</div>
+                <div class="w-full bg-white/10 rounded-full h-1.5 mt-2">
+                    <div class="bg-emerald-400 h-1.5 rounded-full" style="width: {{ [collection_eff, 100]|min }}%"></div>
+                </div>
+            </div>
+
+            <!-- Contract Retention -->
+            <div class="p-4 bg-white/5 rounded-xl border border-white/10 flex flex-col justify-between">
+                <span class="text-[11px] text-slate-400 block uppercase font-bold tracking-wider">Subscription Retention</span>
+                <div class="text-xl sm:text-2xl font-black text-sky-400 mt-2 font-mono">{{ retention_rate }}%</div>
+                <span class="text-[10px] text-slate-300 mt-2 block">
+                    Churn Risk: <strong class="text-rose-400 font-mono">{{ churn_rate }}%</strong>
+                </span>
+            </div>
+
+            <!-- Odoo Variant Surcharge Revenue -->
+            <div class="p-4 bg-white/5 rounded-xl border border-white/10 flex flex-col justify-between">
+                <span class="text-[11px] text-purple-300 block uppercase font-bold tracking-wider flex items-center">
+                    <i class="fa-solid fa-tag text-purple-400 mr-1.5"></i> Odoo Surcharge Margin
+                </span>
+                <div class="text-xl sm:text-2xl font-black text-purple-300 mt-2 font-mono">+₹{{ "{:,.2f}".format(odoo_surcharge_rev) }}</div>
+                <span class="text-[10px] text-purple-200 mt-2 block">
+                    +₹560 per brand seat
+                </span>
+            </div>
+        </div>
+    </div>
+
     <!-- Two Column Section: Recent Subscriptions & Recent Invoices with Clear Next Actions -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 

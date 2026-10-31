@@ -15,11 +15,14 @@
             <p class="text-xs text-slate-500 mt-1">Review customer bills, download printable GST tax invoices, and record UPI or Bank payments.</p>
         </div>
         <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+            <a href="{{ url_for('export_invoices_csv') }}" class="inline-flex items-center px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition-all">
+                <i class="fa-solid fa-file-csv mr-1.5"></i> Export CSV
+            </a>
             <a href="{{ url_for('billing_dashboard') }}" class="inline-flex items-center px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition-all">
                 <i class="fa-solid fa-bolt mr-1.5"></i> Run Billing Day
             </a>
             <a href="{{ url_for('payments_list') }}" class="inline-flex items-center px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all">
-                <i class="fa-solid fa-wallet mr-1.5 text-emerald-400"></i> View Payment History &rarr;
+                <i class="fa-solid fa-wallet mr-1.5 text-emerald-400"></i> Payments &rarr;
             </a>
         </div>
     </div>
@@ -98,10 +101,18 @@
                             {% if is_overdue %}OVERDUE{% else %}{{ inv.status }}{% endif %}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right">
+                    <td class="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
                         <a href="{{ url_for('invoice_detail', inv_id=inv.id) }}" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg font-bold text-xs">
                             View / Pay &rarr;
                         </a>
+                        {% if is_overdue %}
+                        <form action="{{ url_for('chase_overdue', inv_id=inv.id) }}" method="POST" class="inline">
+                            <button type="submit" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg font-bold text-xs inline-flex items-center" title="Send 1-Click Payment Reminder">
+                                <i class="fa-solid fa-bolt mr-1 text-amber-500"></i> Chase
+                                {% if inv.reminder_count %}<span class="ml-1 text-[9px] bg-rose-200 px-1 rounded-full font-black">#{{ inv.reminder_count }}</span>{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}
