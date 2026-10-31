@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}GST Tax Invoice {{ invoice.invoice_number }} | Brightloop India{% endblock %}
+{% block title %}Invoice {{ invoice.invoice_number }} | Brightloop{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-6">
@@ -30,7 +30,7 @@
         <!-- Operational Actions (Confirm, Cancel, Send, Print, Record Payment) -->
         <div class="mt-4 sm:mt-0 flex flex-wrap items-center gap-2">
             <button onclick="window.print()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center">
-                <i class="fa-solid fa-print mr-1.5"></i> Print GST Bill
+                <i class="fa-solid fa-print mr-1.5"></i> Print Invoice
             </button>
 
             {% if current_user.role in ['ADMIN', 'STAFF'] %}
@@ -78,20 +78,17 @@
                         <i class="fa-solid fa-arrows-spin"></i>
                     </div>
                     <div>
-                        <span class="text-xl font-black text-slate-900 tracking-tight">Brightloop Technologies India Pvt. Ltd.</span>
+                        <span class="text-xl font-black text-slate-900 tracking-tight">Brightloop Software</span>
                     </div>
                 </div>
                 <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                    Infopark Phase II, IT SEZ, Kakkanad<br>
-                    Kochi, Kerala 682042 &bull; India<br>
-                    <strong>GSTIN:</strong> 32AAACB1234D1Z5 | <strong>State Code:</strong> 32 (Kerala)<br>
-                    support@brightloop.in | +91 484 290 8000
+                    billing@brightloop.com
                 </p>
             </div>
 
             <div class="text-right">
                 <div class="inline-block px-2.5 py-1 rounded bg-slate-100 text-slate-800 text-[11px] font-black uppercase tracking-wider mb-2">
-                    TAX INVOICE (GST)
+                    INVOICE
                 </div>
                 <div class="font-mono text-sm font-bold text-brand-700">{{ invoice.invoice_number }}</div>
                 <div class="text-xs text-slate-500 mt-2 space-y-1">
@@ -100,7 +97,6 @@
                     {% if invoice.sub_number %}
                     <div>Contract Ref: <strong class="text-slate-800 font-mono">{{ invoice.sub_number }}</strong></div>
                     {% endif %}
-                    <div>SAC Code: <strong class="text-slate-700">998314 (IT Software)</strong></div>
                 </div>
             </div>
         </div>
@@ -111,7 +107,6 @@
                 <span class="text-slate-400 uppercase font-bold text-[10px] block mb-1">Billed To (Customer)</span>
                 <div class="text-sm font-bold text-slate-900">{{ invoice.customer_name }}</div>
                 <div class="text-slate-600 mt-0.5">{{ invoice.customer_email }}</div>
-                <div class="text-slate-400 mt-1">Place of Supply: Kerala (State Code 32)</div>
             </div>
 
             <div class="text-right">
@@ -154,18 +149,16 @@
         <!-- Financial Summary Breakdown with GST Split -->
         <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start gap-4">
             
-            <!-- Left: UPI & Bank Remittance Details (Indian Standard) -->
+            <!-- Left: Payment Instructions -->
             <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs w-full sm:w-72">
                 <div class="font-bold text-slate-800 uppercase tracking-wider text-[10px] mb-2 flex items-center">
-                    <i class="fa-solid fa-building-columns text-emerald-600 mr-1.5"></i> Remittance & UPI Details
+                    <i class="fa-solid fa-credit-card text-emerald-600 mr-1.5"></i> Payment Instructions
                 </div>
                 <div class="space-y-1 text-slate-600 text-[11px]">
-                    <div><strong>Bank:</strong> HDFC Bank, Infopark Branch</div>
-                    <div><strong>A/C No:</strong> 50200098765432</div>
-                    <div><strong>IFSC:</strong> HDFC0001234</div>
-                    <div class="mt-2 pt-2 border-t border-slate-200 flex items-center justify-between">
-                        <span><strong>UPI ID:</strong> brightloop@icici</span>
-                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Verified</span>
+                    <div>Please remit payment by due date.</div>
+                    <div>Supported methods: <strong>UPI</strong>, <strong>NetBanking</strong>, <strong>Card</strong></div>
+                    <div class="mt-2 pt-2 border-t border-slate-200 text-slate-500">
+                        Include invoice reference <strong>{{ invoice.invoice_number }}</strong> in payment notes.
                     </div>
                 </div>
             </div>
@@ -239,7 +232,7 @@
 
         <!-- Invoice Terms & Footer -->
         <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 text-center">
-            This is a computer-generated GST Tax Invoice. Registered under Kerala Goods and Services Tax Act.
+            This is a computer-generated invoice.
         </div>
 
     </div>

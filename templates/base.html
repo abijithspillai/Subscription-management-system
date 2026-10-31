@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Brightloop India | Subscription & Billing Platform{% endblock %}</title>
+    <title>{% block title %}Brightloop | Subscription & Billing Platform{% endblock %}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -53,11 +53,8 @@
                             <i class="fa-solid fa-arrows-spin text-xl"></i>
                         </div>
                         <div>
-                            <div class="flex items-center space-x-1.5">
-                                <span class="text-xl font-black tracking-tight text-slate-900">Brightloop</span>
-                                <span class="text-[11px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-200">🇮🇳 India</span>
-                            </div>
-                            <span class="text-[11px] block font-semibold text-slate-500">Subscription & Billing ERP</span>
+                            <span class="text-xl font-black tracking-tight text-slate-900">Brightloop</span>
+                            <span class="text-[11px] block font-semibold text-slate-500">Subscription & Recurring Billing</span>
                         </div>
                     </a>
 
@@ -70,22 +67,22 @@
 
                         <!-- 2. Subscriptions & Quotes -->
                         <a href="{{ url_for('subscriptions') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'subscription' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-file-contract mr-1 text-xs"></i> Subscriptions & Quotes
+                            <i class="fa-solid fa-file-contract mr-1 text-xs"></i> Subscriptions
                         </a>
 
                         <!-- 3. Billing Day -->
                         <a href="{{ url_for('billing_dashboard') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'billing' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-bolt mr-1 text-xs text-amber-500"></i> Run Billing Day
+                            <i class="fa-solid fa-bolt mr-1 text-xs text-amber-500"></i> Billing Day
                         </a>
 
                         <!-- 4. Invoices -->
                         <a href="{{ url_for('invoices') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'invoice' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-file-invoice mr-1 text-xs text-teal-600"></i> GST Invoices
+                            <i class="fa-solid fa-file-invoice mr-1 text-xs text-teal-600"></i> Invoices
                         </a>
 
                         <!-- 5. Payments -->
                         <a href="{{ url_for('payments_list') }}" class="px-3 py-2 rounded-lg text-xs font-bold {{ 'bg-brand-50 text-brand-700' if 'payment' in request.endpoint else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
-                            <i class="fa-solid fa-wallet mr-1 text-xs text-emerald-600"></i> Payments (UPI/Bank)
+                            <i class="fa-solid fa-wallet mr-1 text-xs text-emerald-600"></i> Payments
                         </a>
 
                         <!-- 6. Catalog Dropdown -->
@@ -98,7 +95,7 @@
                                     <i class="fa-solid fa-cube mr-2 text-brand-500"></i> Products & Variants
                                 </a>
                                 <a href="{{ url_for('plans') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                                    <i class="fa-solid fa-repeat mr-2 text-indigo-500"></i> Monthly/Yearly Plans
+                                    <i class="fa-solid fa-repeat mr-2 text-indigo-500"></i> Billing Plans
                                 </a>
                                 <a href="{{ url_for('quotation_templates') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                     <i class="fa-solid fa-receipt mr-2 text-amber-500"></i> Quotation Templates
@@ -110,7 +107,7 @@
                                     <i class="fa-solid fa-tags mr-2 text-purple-600"></i> Discount Rules
                                 </a>
                                 <a href="{{ url_for('taxes') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                                    <i class="fa-solid fa-percent mr-2 text-teal-600"></i> GST Tax Rules
+                                    <i class="fa-solid fa-percent mr-2 text-teal-600"></i> Tax Rules
                                 </a>
                                 <a href="{{ url_for('manage_staff') }}" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                     <i class="fa-solid fa-users-gear mr-2 text-rose-600"></i> Staff Accounts
@@ -171,18 +168,15 @@
                     <span class="font-bold text-slate-800 flex items-center">
                         <i class="fa-solid fa-map-location-dot text-brand-600 mr-1.5"></i> Workflow Guide:
                     </span>
-                    <a href="{{ url_for('products') }}" class="hover:text-brand-700 font-semibold text-slate-700">1. Catalog & Plans</a>
+                    <a href="{{ url_for('products') }}" class="hover:text-brand-700 font-semibold text-slate-700">1. Products & Plans</a>
                     <span class="text-slate-300">&rarr;</span>
                     <a href="{{ url_for('new_subscription') }}" class="hover:text-brand-700 font-semibold text-slate-700">2. Create Quote</a>
                     <span class="text-slate-300">&rarr;</span>
                     <a href="{{ url_for('billing_dashboard') }}" class="hover:text-amber-700 font-semibold text-amber-800">3. Billing Day</a>
                     <span class="text-slate-300">&rarr;</span>
-                    <a href="{{ url_for('invoices') }}" class="hover:text-teal-700 font-semibold text-teal-800">4. GST Invoices</a>
+                    <a href="{{ url_for('invoices') }}" class="hover:text-teal-700 font-semibold text-teal-800">4. Invoices</a>
                     <span class="text-slate-300">&rarr;</span>
                     <a href="{{ url_for('payments_list') }}" class="hover:text-emerald-700 font-semibold text-emerald-800">5. Collect Payments</a>
-                </div>
-                <div class="text-[11px] text-slate-500 hidden sm:block">
-                    Kochi, Kerala &bull; GST Registered &bull; UPI Enabled
                 </div>
             </div>
         </div>
@@ -215,18 +209,10 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-auto py-5 text-xs text-slate-500 no-print">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-            <div>
-                <strong class="text-slate-800">Brightloop Technologies India Pvt. Ltd.</strong> &copy; 2026.
-                <span class="block text-[11px] text-slate-400 mt-0.5">Infopark Phase II, Kakkanad, Kochi, Kerala &bull; GSTIN: 32AAACB1234D1Z5</span>
-            </div>
-            <div class="flex items-center space-x-4 text-xs font-semibold">
-                <span class="text-slate-600"><i class="fa-solid fa-indian-rupee-sign text-emerald-600 mr-1"></i> INR Billing</span>
-                <span class="text-slate-600"><i class="fa-solid fa-qrcode text-indigo-600 mr-1"></i> UPI & NetBanking</span>
-                <span class="text-slate-600"><i class="fa-solid fa-receipt text-teal-600 mr-1"></i> GST Compliant</span>
-            </div>
+    <!-- Footer (Minimal & Neutral) -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <span>&copy; 2026 Brightloop. All rights reserved.</span>
         </div>
     </footer>
 
