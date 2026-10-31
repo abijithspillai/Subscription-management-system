@@ -26,6 +26,19 @@ def init_db():
         conn.execute("ALTER TABLE invoices ADD COLUMN last_reminder_date DATETIME")
     except sqlite3.OperationalError:
         pass
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS activity_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            action TEXT NOT NULL,
+            entity_type TEXT NOT NULL,
+            entity_id INTEGER,
+            details TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        )
+    """)
     conn.commit()
 
     seed_data(conn)
@@ -224,6 +237,20 @@ def seed_data(conn):
     """, (
         "PAY-2026-0002", inv2_id, 4000.00, today - timedelta(days=40), "CREDIT_CARD", "Partial downpayment", 2
     ))
+
+    # 10. Seed Initial Activity Logs for Audit Trail
+    audit_events = [
+        (1, "PRODUCT_CREATED", "PRODUCT", 1, "Admin Director registered core product 'Brightloop Business ERP' (₹199/mo)"),
+        (1, "VARIANT_ADDED", "VARIANT", 2, "Added product variant 'Odoo Brand Integration' (+₹560 surcharge)"),
+        (1, "PLAN_CREATED", "PLAN", 1, "Registered plan 'Growth Plan (Monthly)' with CAN_RENEW_PAUSE closure rule"),
+        (2, "QUOTE_CREATED", "SUBSCRIPTION", 3, "Sarah Jenkins (Sales) drafted proposal SUB-2026-0003 for Apex Retail Mart"),
+        (1, "BATCH_BILLING_RUN", "INVOICE", 1, "Automated billing day generated monthly GST tax bills without duplicates"),
+        (3, "UPI_PAYMENT_SUCCESS", "PAYMENT", 1, "Apex Retail Mart settled invoice INV-2026-0001 (₹562.86) via Dynamic UPI QR")
+    ]
+    cursor.executemany(
+        "INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details) VALUES (?, ?, ?, ?, ?)",
+        audit_events
+    )
 
     conn.commit()
     print("Database seeding completed successfully.")

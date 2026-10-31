@@ -1,6 +1,6 @@
 # Brightloop Subscription Management System
 > **Odoo Cross Makeathon 9.0 — CUSAT Official Hackathon Submission**  
-> *The unified digital backbone for plans, recurring billing, smart discounts, and cash flow reconciliation.*
+> *The unified digital backbone for plans, recurring billing, smart discounts, dynamic UPI reconciliation, and real-time MRR analytics.*
 
 ---
 
@@ -24,10 +24,10 @@ Brightloop Subscription Management System solves these problems with an integrat
 
 1. **Product Catalog & Variant Engine:**
    - Products with Sales Price, Cost Price, and Margin tracking.
-   - Dynamic variant surcharge modeling (e.g. *Odoo Brand Integration adds $560.00*).
+   - Dynamic variant surcharge modeling (e.g. *Odoo Brand Integration adds ₹560.00*).
 
 2. **Flexible Billing Plans:**
-   - Cadences: `DAILY`, `WEEKLY`, `MONTHLY`, and `YEARLY`.
+   - Cadences: `Daily Pass`, `Starter Plan (Weekly)`, `Growth Plan (Monthly)`, and `Enterprise Plan (Yearly)`.
    - Minimum seat/quantity rules and lifecycle policies (`AUTO_CLOSE` vs `CAN_RENEW_PAUSE`).
 
 3. **Sales Quotation Pipeline:**
@@ -37,7 +37,7 @@ Brightloop Subscription Management System solves these problems with an integrat
 4. **Automated "Billing Day" Engine (Idempotent):**
    - 1-click batch generation of invoices for all due subscriptions.
    - Enforces unique index `(subscription_id, billing_period)` to **strictly prevent double-billing**.
-   - Automatic tax assessment based on admin-defined tax rules.
+   - Automatic tax assessment based on admin-defined GST / Tax rules.
 
 5. **Smart Discount Engine:**
    - Admin-only discount rules: percentage or fixed amount discounts.
@@ -45,7 +45,7 @@ Brightloop Subscription Management System solves these problems with an integrat
    - Automatically evaluated and applied to upcoming recurring invoices.
 
 6. **Payment Reconciliation & Overdue Tracker:**
-   - Multi-method payment recording (`BANK_TRANSFER`, `CREDIT_CARD`, `UPI`, `CASH`, `CHEQUE`).
+   - Multi-method payment recording (`UPI`, `BANK_TRANSFER`, `CREDIT_CARD`, `CASH`, `CHEQUE`).
    - Real-time invoice status transitions (`Draft` ➔ `Confirmed` ➔ `Paid`).
    - Instant filtering for overdue receivables to chase outstanding cash flow.
 
@@ -63,9 +63,9 @@ Brightloop Subscription Management System solves these problems with an integrat
 
 ## 3. Technology Stack
 
-- **Backend:** Python (Flask 3.0+)
+- **Backend:** Python (Flask 3.1+)
 - **Database:** SQLite3 (Local, ACID-compliant, zero cloud dependency, foreign keys enforced)
-- **Frontend:** Tailwind CSS (Responsive mobile/tablet/desktop) + Vanilla JavaScript
+- **Frontend:** Responsive Mobile/Desktop UI + Vanilla JavaScript + Chart.js CDN
 - **Security:** Password hashing (`werkzeug.security`), parametric SQL queries, RBAC session guards
 - **Export & Print:** High-fidelity print stylesheet for browser-native PDF invoice generation
 
@@ -78,7 +78,7 @@ Brightloop Subscription Management System solves these problems with an integrat
 
 ### Step 1: Navigate to Project Directory
 ```bash
-cd C:\Users\hp\.gemini\antigravity\scratch\brightloop-subscriptions
+cd brightloop-subscriptions
 ```
 
 ### Step 2: Install Dependencies
@@ -90,28 +90,31 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
-*Note: On startup, `database.py` automatically initializes `brightloop.db` and populates realistic demo seed data covering all 7 problem scenes.*
+*Note: On startup, `database.py` automatically initializes `brightloop.db` and populates realistic demo seed data covering all requirements.*
 
 ### Step 4: Open in Browser
-Open your browser and navigate to:
-```
-http://127.0.0.1:5000
-```
+- **On Laptop:** Open [http://127.0.0.1:5000](http://127.0.0.1:5000)
+- **On Mobile Phone (Same Wi-Fi):** Open `http://<YOUR_LOCAL_IP>:5000` (e.g., `http://10.165.247.126:5000`)
 
 ---
 
+## 5. Hackathon Showstopper Innovations (Beyond Requirements)
 
----
+In addition to the mandatory problem statement specifications, this platform includes **11 production-grade business innovations**:
 
-## 5. Hackathon Innovation Features (Beyond Requirements)
-
-In addition to the mandatory problem statement specifications, this platform includes 5 production-grade business innovations:
-
-1. **⚡ Dynamic UPI QR Code & 1-Click Instant Payment:** Real-time scannable UPI QR code (conforming to NPCI standard) generated on customer invoices with 1-click simulated instant settlement.
+1. **⚡ Dynamic UPI QR Code & 1-Click Instant Payment:** Real-time scannable UPI QR code (NPCI standard compliant) generated on customer invoices with 1-click simulated instant settlement.
 2. **📢 1-Click Automated Overdue Chaser (Dunning System):** Built-in reminder escalation engine simulating WhatsApp & Email dunning notices directly addressing lost revenue prevention.
 3. **📊 Executive Financial Cockpit (ARR, Churn %, Collection Rate):** Deep SaaS financial metrics including Annual Run-Rate (ARR = MRR × 12), Collection Efficiency %, and Odoo Brand Surcharge Margin.
 4. **🔄 Customer Self-Service Plan Upgrades & Add-Ons:** Allows customers to self-upgrade cadence (Monthly ➔ Yearly) and toggle Odoo Brand integration directly from their portal without emailing support.
 5. **📥 1-Click CSV Financial Exports:** Export audit-ready datasets of Invoices and Subscriptions for Tally, Zoho Books, or Odoo Accounting.
+6. **📈 Interactive Visual Revenue & Cashflow Charts (Chart.js):** Real-time interactive charts displaying MRR Growth Trends and Revenue Cashflow breakdown (Paid vs. Pending).
+7. **🛡️ Customer Pause & Smart Churn Saver Modal:** Customers can pause their contract; if they attempt cancellation, a dynamic retention offer triggers: *"Wait! Stay with us and get 20% OFF your next 3 billing cycles!"*.
+8. **🤖 Smart Discount Auto-Suggester during Quotation:** Staff creating a quote get automatic banner suggestions when quantity exceeds 3 seats (`BULKSEATS20`) or amount exceeds ₹500 (`ODOOSPECIAL`).
+9. **📋 Enterprise Audit Trail & Real-Time Activity Log:** Live compliance timeline tracking every state transition, plan update, billing run, and payment reconciliation.
+10. **📱 1-Click WhatsApp & Email Notification Dispatcher:** Invoice detail view includes one-click pre-formatted WhatsApp payment links and clipboard copy for instant customer communication.
+11. **⚡ Spotlight Global Search (`Ctrl + K`):** Instant search bar across invoices, contracts, customers, and catalog products with zero-latency response.
+
+---
 
 ## 6. Demo Test Credentials (Ready for Evaluators)
 
@@ -121,7 +124,7 @@ In addition to the mandatory problem statement specifications, this platform inc
 | **💼 Internal Staff** | `sarah.staff@brightloop.com` | `Staff@Brightloop1` | Operational execution: quotes, billing run, invoice actions, payments |
 | **🏪 Customer** | `billing@apexretail.in` | `Customer@Brightloop1` | Self-service portal: view own subscriptions, print invoices, pay online |
 
-*Tip: The Sign In page features 1-click demo credential autofill buttons for convenience.*
+*Tip: The Sign In page features 1-click instant login buttons for smooth live demonstrations.*
 
 ---
 
@@ -129,10 +132,10 @@ In addition to the mandatory problem statement specifications, this platform inc
 
 Follow this 5-minute walkthrough during your presentation:
 
-1. **Sign In as Admin:** Inspect the **Executive Finance Cockpit** showing real-time MRR, ARR, active contracts, and overdue receivables.
-2. **Review Products & Variants:** Go to **Catalog & Rules ➔ Products & Variants**. Notice the *Brightloop Business ERP* product with the *Odoo Brand Integration* variant (+ ₹560.00 surcharge).
+1. **Sign In as Admin:** Inspect the **Executive Finance Cockpit** showing real-time MRR, ARR, active contracts, Chart.js cashflow charts, and the Live Enterprise Audit Trail.
+2. **Review Products & Variants:** Go to **Catalog & Rules ➔ Products & Variants**. Notice the *Brightloop Business ERP* product with the *Odoo Brand Integration* variant (+₹560.00 surcharge).
 3. **Inspect Quotation to Subscription:** Go to **Subscriptions**. Open `SUB-2026-0003` to show the lifecycle stepper (`Draft` ➔ `Quotation` ➔ `Confirmed` ➔ `Active`).
 4. **Execute Billing Day:** Go to **Billing Day**. Notice the subscriptions due for renewal today. Click **"Run Batch Billing Now"**. Verify that invoices are automatically generated and no duplicate charges occur.
 5. **Inspect & Print Invoice:** Open any generated invoice. Demonstrate the automated tax calculation, applied discount deduction, and click **"Print Invoice"** to show the professional PDF invoice layout.
 6. **Record Payment & Reconciliation:** Record a partial or full payment on an invoice (e.g., via Bank Transfer or UPI). Watch the invoice balance update instantly to `Paid`.
-7. **Switch to Customer Portal:** Log out and log in as `billing@apexretail.in`. Demonstrate that the customer sees **only** their own contracts and invoices, with self-service payment options.
+7. **Switch to Customer Portal:** Log out and log in as `billing@apexretail.in`. Demonstrate that the customer sees **only** their own contracts and invoices, with dynamic UPI QR code, 1-click payment, and self-service upgrade/pause controls.

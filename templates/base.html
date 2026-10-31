@@ -30,7 +30,9 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN for Interactive Financial Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Local Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
@@ -130,6 +132,12 @@
                 <!-- Right: Quick Action & User Menu -->
                 <div class="flex items-center space-x-3">
                     {% if current_user.id %}
+                        <!-- Spotlight Search Trigger -->
+                        <button onclick="openSpotlightSearch()" class="hidden sm:inline-flex items-center px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold space-x-1.5 transition-all cursor-pointer">
+                            <i class="fa-solid fa-magnifying-glass text-xs text-slate-400"></i>
+                            <span>Search</span>
+                            <kbd class="px-1.5 py-0.2 bg-white border border-slate-300 rounded text-[9px] font-mono text-slate-500 shadow-2xs">Ctrl K</kbd>
+                        </button>
                         {% if current_user.role in ['ADMIN', 'STAFF'] %}
                         <a href="{{ url_for('new_subscription') }}" class="hidden sm:inline-flex items-center px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all">
                             <i class="fa-solid fa-plus mr-1"></i> New Quote
@@ -219,5 +227,91 @@
     </footer>
 
     {% block scripts %}{% endblock %}
+
+    <!-- Global Spotlight Search Modal (Ctrl + K) -->
+    <div id="modal-spotlight" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden" onclick="event.stopPropagation()">
+            <div class="p-3 border-b border-slate-200 flex items-center space-x-2.5 bg-slate-50">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm ml-1"></i>
+                <input id="spotlight-input" type="text" placeholder="Search invoices, contracts, customers, products..." 
+                       oninput="handleSpotlightInput(this.value)"
+                       class="w-full bg-transparent text-sm font-medium text-slate-800 placeholder-slate-400 outline-none">
+                <kbd class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 bg-slate-200 rounded">ESC</kbd>
+            </div>
+            <div id="spotlight-results" class="max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs p-1">
+                <div class="p-4 text-center text-slate-400">Type at least 2 characters to search...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openSpotlightSearch() {
+            const modal = document.getElementById('modal-spotlight');
+            if (modal) {
+                modal.classList.remove('hidden');
+                const inp = document.getElementById('spotlight-input');
+                inp.value = '';
+                inp.focus();
+                document.getElementById('spotlight-results').innerHTML = '<div class="p-4 text-center text-slate-400">Type at least 2 characters to search...</div>';
+            }
+        }
+        function closeSpotlightSearch() {
+            const modal = document.getElementById('modal-spotlight');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // Global hotkey: Ctrl + K or Cmd + K or ESC
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                openSpotlightSearch();
+            }
+            if (e.key === 'Escape') {
+                closeSpotlightSearch();
+            }
+        });
+
+        // Click outside closes
+        document.getElementById('modal-spotlight')?.addEventListener('click', closeSpotlightSearch);
+
+        let searchTimeout = null;
+        function handleSpotlightInput(q) {
+            clearTimeout(searchTimeout);
+            const container = document.getElementById('spotlight-results');
+            if (!q || q.length < 2) {
+                container.innerHTML = '<div class="p-4 text-center text-slate-400">Type at least 2 characters to search...</div>';
+                return;
+            }
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search?q=${encodeURIComponent(q)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            container.innerHTML = '<div class="p-4 text-center text-slate-400">No matching records found.</div>';
+                            return;
+                        }
+                        let html = '';
+                        data.forEach(item => {
+                            html += `
+                                <a href="${item.url}" class="p-2.5 hover:bg-slate-50 flex items-center justify-between rounded-lg transition-colors group">
+                                    <div class="flex items-center space-x-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-xs">
+                                            <i class="fa-solid ${item.icon}"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-slate-900 group-hover:text-brand-600">${item.title}</div>
+                                            <div class="text-[10px] text-slate-400">${item.subtitle}</div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">${item.type}</span>
+                                </a>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    });
+            }, 180);
+        }
+    </script>
 </body>
+
 </html>

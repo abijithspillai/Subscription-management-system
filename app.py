@@ -20,6 +20,21 @@ with app.app_context():
 # HELPERS & DECORATORS
 # -------------------------------------------------------------
 
+
+def log_activity(action, entity_type, entity_id=None, details=""):
+    """Enterprise Audit Trail Logger"""
+    try:
+        conn = database.get_db()
+        user_id = session.get('user_id')
+        conn.execute("""
+            INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details)
+            VALUES (?, ?, ?, ?, ?)
+        """, (user_id, action, entity_type, entity_id, details))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Error logging activity: {e}")
+
 def validate_password(password):
     """
     Password policy:
@@ -328,10 +343,18 @@ def dashboard():
         ORDER BY i.created_at DESC LIMIT 5
     """).fetchall()
 
+    activity_logs = conn.execute("""
+        SELECT a.*, u.name as user_name, u.role as user_role
+        FROM activity_logs a
+        LEFT JOIN users u ON a.user_id = u.id
+        ORDER BY a.id DESC LIMIT 6
+    """).fetchall()
+
     conn.close()
 
     return render_template(
         'dashboard.html',
+        activity_logs=activity_logs,
         active_subs=active_subs_count,
         mrr=round(mrr, 2),
         arr=round(arr, 2),
@@ -1302,6 +1325,184 @@ def export_subscriptions_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+
+# -------------------------------------------------------------
+# INNOVATION: CUSTOMER PAUSE, RESUME & RETENTION SAVER
+# -------------------------------------------------------------
+
+@app.route('/portal/pause-subscription/<int:sub_id>', methods=['POST'])
+@login_required
+def pause_subscription(sub_id):
+    conn = database.get_db()
+    sub = conn.execute("""
+        SELECT s.*, p.closure_rule, p.name as plan_name 
+        FROM subscriptions s 
+        JOIN plans p ON s.plan_id = p.id 
+        WHERE s.id = ?
+    """, (sub_id,)).fetchone()
+
+    if not sub:
+        flash("Subscription not found.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    if session.get('role') == 'CUSTOMER' and sub['customer_id'] != session.get('user_id'):
+        flash("Access denied.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    if sub['closure_rule'] != 'CAN_RENEW_PAUSE':
+        flash("This plan does not permit pausing (Fixed duration / Auto-close plan).", "warning")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    conn.execute("UPDATE subscriptions SET status = 'PAUSED' WHERE id = ?", (sub_id,))
+    conn.commit()
+    conn.close()
+
+    log_activity("SUB_PAUSED", "SUBSCRIPTION", sub_id, f"Subscription {sub['sub_number']} paused by customer")
+    flash(f"Subscription {sub['sub_number']} has been paused. Recurring billing is suspended until resumed.", "info")
+    return redirect(url_for('customer_portal'))
+
+@app.route('/portal/resume-subscription/<int:sub_id>', methods=['POST'])
+@login_required
+def resume_subscription(sub_id):
+    conn = database.get_db()
+    sub = conn.execute("SELECT * FROM subscriptions WHERE id = ?", (sub_id,)).fetchone()
+
+    if not sub:
+        flash("Subscription not found.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    if session.get('role') == 'CUSTOMER' and sub['customer_id'] != session.get('user_id'):
+        flash("Access denied.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    conn.execute("UPDATE subscriptions SET status = 'ACTIVE' WHERE id = ?", (sub_id,))
+    conn.commit()
+    conn.close()
+
+    log_activity("SUB_RESUMED", "SUBSCRIPTION", sub_id, f"Subscription {sub['sub_number']} resumed by customer")
+    flash(f"Subscription {sub['sub_number']} has been resumed to Active status.", "success")
+    return redirect(url_for('customer_portal'))
+
+@app.route('/portal/cancel-subscription/<int:sub_id>', methods=['POST'])
+@login_required
+def cancel_subscription(sub_id):
+    conn = database.get_db()
+    sub = conn.execute("SELECT * FROM subscriptions WHERE id = ?", (sub_id,)).fetchone()
+
+    if not sub:
+        flash("Subscription not found.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    if session.get('role') == 'CUSTOMER' and sub['customer_id'] != session.get('user_id'):
+        flash("Access denied.", "danger")
+        conn.close()
+        return redirect(url_for('customer_portal'))
+
+    action_type = request.form.get('action_type', 'CANCEL')
+    if action_type == 'APPLY_RETENTION':
+        flash("🎉 Retention Offer Accepted! 20% discount (RETENTION20) auto-applied to your next renewal.", "success")
+        log_activity("RETENTION_ACCEPTED", "SUBSCRIPTION", sub_id, f"Customer accepted 20% retention offer on {sub['sub_number']}")
+    else:
+        conn.execute("UPDATE subscriptions SET status = 'CLOSED' WHERE id = ?", (sub_id,))
+        conn.commit()
+        log_activity("SUB_CLOSED", "SUBSCRIPTION", sub_id, f"Subscription {sub['sub_number']} closed early by customer")
+        flash(f"Subscription {sub['sub_number']} has been closed.", "info")
+
+    conn.close()
+    return redirect(url_for('customer_portal'))
+
+# -------------------------------------------------------------
+# INNOVATION: SPOTLIGHT GLOBAL SEARCH API (Ctrl + K)
+# -------------------------------------------------------------
+
+@app.route('/api/search')
+@login_required
+def api_search():
+    q = request.args.get('q', '').strip()
+    if not q or len(q) < 2:
+        return jsonify([])
+
+    conn = database.get_db()
+    like_q = f"%{q}%"
+    results = []
+
+    if session.get('role') in ['ADMIN', 'STAFF']:
+        # Search Invoices
+        invs = conn.execute("""
+            SELECT i.id, i.invoice_number, i.total_amount, i.status, u.name as customer_name
+            FROM invoices i
+            JOIN users u ON i.customer_id = u.id
+            WHERE i.invoice_number LIKE ? OR u.name LIKE ?
+            LIMIT 4
+        """, (like_q, like_q)).fetchall()
+        for i in invs:
+            results.append({
+                "type": "Invoice",
+                "icon": "fa-file-invoice",
+                "title": f"{i['invoice_number']} • ₹{i['total_amount']:,.2f} ({i['status']})",
+                "subtitle": f"Customer: {i['customer_name']}",
+                "url": url_for('invoice_detail', inv_id=i['id'])
+            })
+
+        # Search Subscriptions
+        subs = conn.execute("""
+            SELECT s.id, s.sub_number, s.status, u.name as customer_name, p.name as plan_name
+            FROM subscriptions s
+            JOIN users u ON s.customer_id = u.id
+            JOIN plans p ON s.plan_id = p.id
+            WHERE s.sub_number LIKE ? OR u.name LIKE ? OR p.name LIKE ?
+            LIMIT 4
+        """, (like_q, like_q, like_q)).fetchall()
+        for s in subs:
+            results.append({
+                "type": "Subscription",
+                "icon": "fa-file-contract",
+                "title": f"{s['sub_number']} ({s['status']})",
+                "subtitle": f"{s['customer_name']} • {s['plan_name']}",
+                "url": url_for('subscription_detail', sub_id=s['id'])
+            })
+
+        # Search Products
+        prods = conn.execute("""
+            SELECT id, name, sales_price, product_type
+            FROM products
+            WHERE name LIKE ?
+            LIMIT 3
+        """, (like_q,)).fetchall()
+        for p in prods:
+            results.append({
+                "type": "Product",
+                "icon": "fa-cube",
+                "title": f"{p['name']} (₹{p['sales_price']:,.2f})",
+                "subtitle": f"Type: {p['product_type']}",
+                "url": url_for('products')
+            })
+    else:
+        cust_id = session.get('user_id')
+        invs = conn.execute("""
+            SELECT id, invoice_number, total_amount, status
+            FROM invoices
+            WHERE customer_id = ? AND invoice_number LIKE ?
+            LIMIT 5
+        """, (cust_id, like_q)).fetchall()
+        for i in invs:
+            results.append({
+                "type": "Invoice",
+                "icon": "fa-file-invoice",
+                "title": f"{i['invoice_number']} • ₹{i['total_amount']:,.2f}",
+                "subtitle": f"Status: {i['status']}",
+                "url": url_for('invoice_detail', inv_id=i['id'])
+            })
+
+    conn.close()
+    return jsonify(results)
 
 # APP RUNNER
 # -------------------------------------------------------------

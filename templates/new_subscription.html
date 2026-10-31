@@ -112,6 +112,22 @@
                 </table>
             </div>
 
+                        <!-- Smart Discount Auto-Suggester (Innovation 3: Auto-Qualified Rules) -->
+            <div id="smart-discount-alert" class="hidden p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900 shadow-sm">
+                <div class="flex items-center space-x-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                        <i class="fa-solid fa-gift"></i>
+                    </span>
+                    <div>
+                        <strong id="smart-discount-title" class="font-bold">Bulk Purchase Rule Qualified!</strong>
+                        <span id="smart-discount-desc" class="text-emerald-700 block text-[11px] mt-0.5">3+ seats qualified for 20% discount (BULKSEATS20).</span>
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-800">
+                    Auto-Eligible
+                </span>
+            </div>
+
             <!-- Grand Total Bar -->
             <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-sm font-bold">
                 <span class="text-slate-600">Calculated Recurring Subtotal:</span>
@@ -244,6 +260,23 @@
             total += (qty * price);
         });
         document.getElementById('grand-total').innerText = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        // Innovation 3: Dynamic Discount Rule Auto-Detection
+        const discountBox = document.getElementById('smart-discount-alert');
+        const titleEl = document.getElementById('smart-discount-title');
+        const descEl = document.getElementById('smart-discount-desc');
+
+        if (totalSeats >= 3) {
+            discountBox.classList.remove('hidden');
+            titleEl.innerText = 'Volume Seat Rule Qualified: BULKSEATS20';
+            descEl.innerText = `${totalSeats} seats added. Automatic 20% discount will appear on next invoice!`;
+        } else if (total >= 500) {
+            discountBox.classList.remove('hidden');
+            titleEl.innerText = 'Enterprise Value Spend Qualified: ODOOSPECIAL';
+            descEl.innerText = `Contract value exceeds ₹500. Automatic ₹150 discount applied!`;
+        } else {
+            discountBox.classList.add('hidden');
+        }
     }
 
     // Initialize with 1 line
